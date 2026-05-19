@@ -278,6 +278,62 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 
 <div class="toast" id="toast"></div>
 
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js';
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js';
+
+/* ─────────────────────────────────────────────────────────────
+   FIREBASE CONFIG — paste the config from your Firebase project:
+     Firebase Console → Project Settings → General →
+     Your apps → Web app → "SDK setup and configuration" → Config
+   Replace every PASTE_… value below, then redeploy.
+   ───────────────────────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_PROJECT_ID.appspot.com",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID"
+};
+/* ───────────────────────────────────────────────────────────── */
+
+const isConfigured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('PASTE_');
+
+if (!isConfigured) {
+  window.addEventListener('DOMContentLoaded', () => {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#fef3c7;color:#92400e;padding:10px 16px;font:13px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;text-align:center;border-bottom:1px solid #fcd34d';
+    banner.innerHTML = '<strong>Firebase not configured.</strong> Cases are saved only on this device until you paste the Firebase config in <code>index.html</code> and redeploy.';
+    document.body.insertBefore(banner, document.body.firstChild);
+  });
+} else {
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const casesCol = collection(db, 'cases');
+
+  onSnapshot(
+    casesCol,
+    snap => {
+      const data = snap.docs.map(d => d.data());
+      window.onCasesUpdate?.(data);
+    },
+    err => {
+      console.error('Firestore listen error:', err);
+      window.showToast?.('Sync error — check Firestore rules', 'warning');
+    }
+  );
+
+  window.fbSave = (c) => setDoc(doc(casesCol, c.id), c).catch(e => {
+    console.error('Firestore save failed:', e);
+    window.showToast?.('Save failed — check connection', 'warning');
+  });
+  window.fbDelete = (id) => deleteDoc(doc(casesCol, id)).catch(e => {
+    console.error('Firestore delete failed:', e);
+  });
+}
+</script>
+
 <script>
 const DB_KEY = 'auc_court_cases_v5';
 let cases = [], selectedDate = todayStr(), calViewDate = new Date(), editingId = null;
@@ -304,7 +360,18 @@ function fmtShort(d) {
 function load() {
   try { const r = localStorage.getItem(DB_KEY); if(r) cases = JSON.parse(r); } catch(e) { cases = []; }
 }
-function persist() { localStorage.setItem(DB_KEY, JSON.stringify(cases)); }
+function saveCache() { try { localStorage.setItem(DB_KEY, JSON.stringify(cases)); } catch(e) {} }
+function persist(c) {
+  saveCache();
+  if (c) window.fbSave?.(c);
+}
+
+// Firestore snapshot listener calls this whenever the shared collection changes.
+window.onCasesUpdate = (data) => {
+  cases = data;
+  saveCache();
+  render();
+};
 
 function render() { renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); }
 
@@ -468,14 +535,14 @@ function renderCases() {
 /* ── Actions ── */
 function updateSr(id, val) {
   const c = cases.find(x=>x.id===id); if(!c) return;
-  c.srNo = parseInt(val)||null; persist();
+  c.srNo = parseInt(val)||null; persist(c);
   showToast('Sr # updated','success');
 }
 
 function setJudgeStatus(id, status) {
   const c = cases.find(x=>x.id===id); if(!c) return;
   c.judgeStatus = c.judgeStatus===status ? null : status;
-  persist(); render();
+  persist(c); render();
   showToast(c.judgeStatus==='Y'?'Judge marked present':c.judgeStatus==='N'?'Judge marked absent':'Status cleared','success');
 }
 
@@ -483,7 +550,7 @@ function setNextDate(id, val) {
   const c = cases.find(x=>x.id===id); if(!c) return;
   c.nextDate = val||null;
   // Case STAYS on current date — only Advance button moves it
-  persist(); render();
+  persist(c); render();
   if(val) showToast('Next date noted: '+fmtDMY(val),'success');
 }
 
@@ -497,7 +564,7 @@ function advanceCase(id) {
   c.judgeStatus = null;
   c.srNo = null;
   c.done = false;
-  persist();
+  persist(c);
   selectedDate = newDate;
   render();
   showToast('Case advanced to '+fmtDMY(newDate),'success');
@@ -532,16 +599,20 @@ function saveCase() {
   const title = document.getElementById('f-title').value.trim();
   const judge = document.getElementById('f-judge').value.trim();
   if(!date||!title||!judge) { showToast('Date, Title and Judge are required','warning'); return; }
+  let saved;
   if(editingId) {
-    const c = cases.find(x=>x.id===editingId);
-    if(c) { c.date=date; c.title=title; c.judge=judge; c.proceedings=document.getElementById('f-proceedings').value.trim(); }
+    saved = cases.find(x=>x.id===editingId);
+    if(saved) { saved.date=date; saved.title=title; saved.judge=judge; saved.proceedings=document.getElementById('f-proceedings').value.trim(); }
   } else {
-    cases.push({ id:Date.now().toString(), date, title, judge,
+    const newId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString()+Math.random().toString(36).slice(2,8));
+    saved = { id:newId, date, title, judge,
       proceedings: document.getElementById('f-proceedings').value.trim(),
       srNo:null, judgeStatus:null, nextDate:null, lastDate:null, done:false,
-      created:new Date().toISOString() });
+      created:new Date().toISOString() };
+    cases.push(saved);
   }
-  persist(); selectedDate=date; closeSheet('add-overlay'); render();
+  if(saved) persist(saved);
+  selectedDate=date; closeSheet('add-overlay'); render();
   showToast(editingId?'Case updated':'Case added successfully','success');
 }
 
@@ -587,21 +658,9 @@ function showToast(msg,type='') {
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-/* ── Demo seed ── */
-function seedDemo() {
-  if(cases.length>0) return;
-  const today=todayStr();
-  const d3=new Date(); d3.setDate(d3.getDate()+3); const d3s=d3.toISOString().split('T')[0];
-  cases=[
-    { id:'1', date:today, title:"Muhammad Waleed Ahmad v. Lucky Motor Corporation Ltd", judge:"Hon'ble Mr. Justice Sardar Tariq Masood", proceedings:"Arguments on maintainability of injunction application", srNo:3, judgeStatus:"Y", nextDate:d3s, lastDate:null, done:false, created:new Date().toISOString() },
-    { id:'2', date:today, title:"Naeem Afzal v. Meezan Bank Limited", judge:"Hon'ble Mr. Justice Anwarul Haq Pannun", proceedings:"Stay application — banking dispute", srNo:7, judgeStatus:null, nextDate:null, lastDate:null, done:false, created:new Date().toISOString() },
-    { id:'3', date:today, title:"State v. Accused — Cr. Case No. 142 of 2024", judge:"Hon'ble Mr. Justice Tariq Saleem Sheikh", proceedings:"Bail application — final arguments", srNo:12, judgeStatus:"N", nextDate:null, lastDate:null, done:false, created:new Date().toISOString() },
-    { id:'4', date:today, title:"AUC Developers (Pvt) Ltd v. Lahore Development Authority", judge:"Hon'ble Mr. Justice Shujaat Ali Khan", proceedings:"Written statements filed. Case at issue.", srNo:null, judgeStatus:null, nextDate:null, lastDate:null, done:false, created:new Date().toISOString() },
-  ];
-  persist();
-}
-
-load(); seedDemo(); render();
+// Bootstrap: render cached data instantly; Firestore snapshot will
+// then replace it with the authoritative shared copy when it arrives.
+load(); render();
 </script>
 </body>
 </html>
