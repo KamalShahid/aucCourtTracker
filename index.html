@@ -5,27 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>AUC | Law — Court Cause List</title>
 <style>
-/* Apple system font stack */
 :root {
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
-  --ink: #0f1117;
-  --ink2: #2a2d3a;
-  --ink3: #5a5f72;
-  --ink4: #9099b0;
-  --paper: #f7f5f0;
-  --paper2: #eeebe4;
-  --paper3: #e4e0d8;
-  --gold: #b8963e;
-  --gold2: #d4af5a;
-  --emerald: #1a5c3a;
-  --emerald2: #2d8a5a;
-  --emerald3: #e8f5ee;
-  --crimson: #8b1a1a;
-  --crimson2: #c0392b;
-  --crimson3: #fdf0f0;
-  --sapphire: #1a3a6b;
-  --amber2: #d4820f;
+  --ink: #0f1117; --ink2: #2a2d3a; --ink3: #5a5f72; --ink4: #9099b0;
+  --paper: #f7f5f0; --paper2: #eeebe4; --paper3: #e4e0d8;
+  --gold: #b8963e; --gold2: #d4af5a;
+  --emerald: #1a5c3a; --emerald2: #2d8a5a; --emerald3: #e8f5ee;
+  --crimson: #8b1a1a; --crimson2: #c0392b; --crimson3: #fdf0f0;
+  --sapphire: #1a3a6b; --sapphire2: #2563a8; --sapphire3: #eef4fc;
+  --amber2: #d4820f; --amber3: #fef3e2;
   --radius: 12px;
   --shadow: 0 2px 12px rgba(15,17,23,0.08);
   --shadow-lg: 0 8px 32px rgba(15,17,23,0.14);
@@ -33,15 +22,24 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font); background: var(--paper); color: var(--ink); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
+/* Sync */
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink4); display: inline-block; transition: background 0.3s; }
+.sync-dot.live { background: var(--emerald2); animation: pulse-dot 2s infinite; }
+.sync-dot.error { background: var(--crimson2); }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.sync-label { font-size: 10px; color: var(--ink4); }
+.sync-label.live { color: var(--emerald2); }
+.sync-wrap { display: flex; align-items: center; gap: 5px; }
+
 /* Header */
 .app-header { background: var(--ink); padding: 0 16px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-lg); }
-.header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 12px; height: 56px; }
+.header-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 10px; height: 56px; }
 .brand { display: flex; align-items: center; gap: 10px; flex: 1; }
-.brand-seal { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--gold); flex-shrink: 0; letter-spacing: 0.3px; }
+.brand-seal { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
 .brand-name { font-size: 17px; font-weight: 600; color: var(--paper); letter-spacing: -0.3px; }
 .brand-sub { font-size: 10px; color: var(--gold2); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-.header-date-btn { display: flex; align-items: center; gap: 6px; background: rgba(184,150,62,0.15); border: 1px solid rgba(184,150,62,0.3); border-radius: 8px; padding: 6px 12px; cursor: pointer; color: var(--gold2); font-size: 12px; font-weight: 500; font-family: var(--font); }
-.header-date-btn svg { width:14px; height:14px; }
+.header-date-btn { display: flex; align-items: center; gap: 6px; background: rgba(184,150,62,0.15); border: 1px solid rgba(184,150,62,0.3); border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--gold2); font-size: 12px; font-weight: 500; font-family: var(--font); white-space: nowrap; }
+.header-date-btn svg { width:13px; height:13px; }
 .add-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
 .add-btn:hover { background: var(--gold2); transform: scale(1.05); }
 .add-btn svg { width:16px; height:16px; }
@@ -54,16 +52,16 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .cal-day:hover { background: rgba(255,255,255,0.08); }
 .cal-day.active { background: var(--gold); border-color: var(--gold2); }
 .cal-day.has-cases { border-color: rgba(184,150,62,0.4); }
-.cal-day .day-name { font-size: 10px; color: var(--ink4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
+.cal-day .day-name { font-size: 10px; color: var(--ink4); font-weight: 500; text-transform: uppercase; }
 .cal-day.active .day-name { color: var(--ink); }
-.cal-day .day-num { font-size: 17px; font-weight: 600; color: var(--paper); margin-top: 1px; letter-spacing: -0.5px; }
+.cal-day .day-num { font-size: 17px; font-weight: 600; color: var(--paper); margin-top: 1px; }
 .cal-day.active .day-num { color: var(--ink); }
 .cal-day .day-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold2); margin-top: 3px; }
 .cal-day.active .day-dot { background: var(--ink); }
 .cal-expand-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 10px; cursor: pointer; color: var(--paper); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
 .cal-expand-btn svg { width:14px; height:14px; }
 
-/* Stats Bar */
+/* Stats */
 .stats-bar { background: white; border-bottom: 1px solid var(--paper3); padding: 8px 16px; position: sticky; top: 100px; z-index: 90; }
 .stats-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 16px; overflow-x: auto; scrollbar-width: none; }
 .stats-inner::-webkit-scrollbar { display: none; }
@@ -78,35 +76,51 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .date-heading-text { font-size: 20px; font-weight: 700; color: var(--ink2); white-space: nowrap; letter-spacing: -0.3px; }
 .date-badge { background: var(--ink); color: var(--gold2); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
 .no-cases { text-align: center; padding: 48px 16px; color: var(--ink4); }
-.no-cases svg { width: 48px; height: 48px; opacity: 0.3; margin-bottom: 12px; display: block; margin-left: auto; margin-right: auto; }
+.no-cases svg { width:48px; height:48px; opacity:0.3; margin-bottom:12px; display:block; margin-left:auto; margin-right:auto; }
 .no-cases p { font-size: 14px; }
 
 /* Case Card */
-.case-card { background: white; border-radius: var(--radius); border: 1px solid var(--paper3); margin-bottom: 10px; overflow: hidden; transition: border-color 0.3s; box-shadow: var(--shadow); animation: slideIn 0.25s ease; }
+.case-card { background: white; border-radius: var(--radius); border: 1px solid var(--paper3); margin-bottom: 12px; overflow: hidden; transition: border-color 0.3s; box-shadow: var(--shadow); animation: slideIn 0.25s ease; }
 .case-card.next-set { border-color: var(--gold); border-width: 1.5px; }
-@keyframes slideIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes slideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
 
-/* Case Title — centered, large, bold */
-.case-title-wrap { padding: 14px 16px 10px; text-align: center; border-bottom: 1px solid var(--paper2); background: white; }
+/* Card Top Bar */
+.card-topbar { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 8px 12px 0; }
+.icon-btn { width: 30px; height: 30px; border-radius: 8px; border: none; background: var(--paper2); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink3); flex-shrink: 0; transition: background 0.15s; }
+.icon-btn:hover { background: var(--paper3); }
+.icon-btn svg { width: 14px; height: 14px; }
+.attach-badge { background: var(--sapphire); color: white; font-size: 9px; font-weight: 700; border-radius: 99px; padding: 1px 5px; margin-left: -8px; margin-top: -8px; align-self: flex-start; }
+.new-attach-badge { background: var(--gold); color: white; font-size: 9px; font-weight: 700; border-radius: 99px; padding: 2px 7px; display: flex; align-items: center; gap: 3px; }
+
+/* Case Title */
+.case-title-wrap { padding: 10px 16px; text-align: center; border-bottom: 1px solid var(--paper2); }
 .case-title { font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.3; letter-spacing: -0.4px; }
 
 /* Case Body */
 .case-body { padding: 12px 14px; }
+
+/* Judge + Room row — side by side */
+.judge-room-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 10px; }
+.judge-room-row .meta-item { margin-bottom: 0; }
+.judge-room-row .meta-item:first-child { padding-right: 10px; border-right: 1px solid var(--paper2); }
+.judge-room-row .meta-item:last-child { padding-left: 10px; }
+
 .meta-item { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
 .meta-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
 .meta-value { font-size: 13px; color: var(--ink2); font-weight: 500; line-height: 1.4; }
-.meta-value.judge { color: var(--sapphire); font-weight: 600; }
-.meta-value.proceedings { font-size: 13px; color: var(--ink3); font-weight: 400; font-style: normal; }
+.meta-value.judge { color: var(--sapphire); font-weight: 700; font-size: 15px; }
+.meta-value.room { color: var(--ink2); font-weight: 600; font-size: 14px; }
+.meta-value.proceedings { font-size: 13px; color: var(--ink3); font-weight: 400; }
 
-/* Actions row — Sr# input + Judge Y/N in one row */
+/* Actions row */
 .case-actions { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--paper2); flex-wrap: wrap; background: var(--paper); }
 .sr-field { display: flex; align-items: center; gap: 8px; }
 .sr-input-label { font-size: 11px; color: var(--ink4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
-.sr-input { width: 64px; border: 1.5px solid var(--paper3); border-radius: 8px; padding: 6px 8px; font-size: 14px; font-family: var(--font-mono); color: var(--ink); background: white; text-align: center; font-weight: 600; transition: border-color 0.15s; }
+.sr-input { width: 64px; border: 1.5px solid var(--paper3); border-radius: 8px; padding: 6px 8px; font-size: 14px; font-family: var(--font-mono); color: var(--ink); background: white; text-align: center; font-weight: 600; }
 .sr-input:focus { outline: none; border-color: var(--gold); }
 .judge-status-wrap { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .judge-label { font-size: 11px; color: var(--ink4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.yn-btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--paper3); background: white; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: var(--font); letter-spacing: 0.3px; }
+.yn-btn { padding: 6px 14px; border-radius: 8px; border: 1.5px solid var(--paper3); background: white; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: var(--font); }
 .yn-btn.yes { border-color: var(--emerald2); color: var(--emerald); }
 .yn-btn.yes.active { background: var(--emerald); color: white; border-color: var(--emerald); }
 .yn-btn.no { border-color: var(--crimson2); color: var(--crimson); }
@@ -117,33 +131,115 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .status-chip.unknown { background: var(--paper2); color: var(--ink4); }
 .status-chip::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
 
-/* Dates row — Last + Next side by side */
-.dates-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--paper2); }
+/* Dates row */
+.dates-row { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--paper2); }
 .date-field { display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; }
 .date-field:first-child { border-right: 1px solid var(--paper2); }
 .date-field-label { font-size: 10px; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
-.last-date-val { font-size: 14px; font-weight: 600; color: var(--ink3); font-family: var(--font-mono); letter-spacing: 0.3px; }
+.last-date-val { font-size: 14px; font-weight: 600; color: var(--ink3); font-family: var(--font-mono); }
 .last-date-val.empty { font-size: 13px; color: var(--ink4); font-family: var(--font); font-weight: 400; }
-.next-date-picker { border: 1.5px solid var(--paper3); border-radius: 8px; padding: 6px 8px; font-size: 13px; font-family: var(--font); color: var(--ink2); background: white; width: 100%; cursor: pointer; transition: border-color 0.15s; font-weight: 500; }
+.next-date-picker { border: 1.5px solid var(--paper3); border-radius: 8px; padding: 6px 8px; font-size: 13px; font-family: var(--font); color: var(--ink2); background: white; width: 100%; cursor: pointer; font-weight: 500; }
 .next-date-picker:focus { outline: none; border-color: var(--gold); }
-.next-date-picker.set { border-color: var(--gold); background: #fef9ec; color: var(--gold); font-weight: 700; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.3px; }
+.next-date-picker.set { border-color: var(--gold); background: #fef9ec; color: var(--gold); font-weight: 700; font-family: var(--font-mono); }
 
-/* Advance row — only shows when next date is set */
-.advance-row { display: flex; align-items: center; justify-content: flex-end; padding: 10px 14px; border-top: 1px solid var(--paper2); background: #fef9ec; gap: 10px; }
+/* —— Comments Section —— */
+.comments-section { border-top: 1px solid var(--paper2); padding: 12px 14px; background: var(--paper); }
+.comments-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.comments-title { font-size: 11px; font-weight: 700; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px; }
+.comments-title svg { width: 13px; height: 13px; }
+.comment-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
+.comment-item { background: white; border: 0.5px solid var(--paper3); border-radius: 8px; padding: 8px 10px; position: relative; }
+.comment-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.comment-author { font-size: 11px; font-weight: 700; color: var(--sapphire); }
+.comment-time { font-size: 10px; color: var(--ink4); }
+.comment-text { font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.comment-del { position: absolute; top: 6px; right: 6px; background: none; border: none; cursor: pointer; color: var(--ink4); padding: 2px; opacity: 0.5; }
+.comment-del:hover { opacity: 1; color: var(--crimson2); }
+.comment-del svg { width: 12px; height: 12px; }
+.comment-input-wrap { display: flex; gap: 7px; align-items: flex-end; }
+.comment-input { flex: 1; border: 1.5px solid var(--paper3); border-radius: 8px; padding: 8px 10px; font-size: 13px; font-family: var(--font); color: var(--ink); background: white; resize: none; min-height: 38px; max-height: 100px; line-height: 1.4; }
+.comment-input:focus { outline: none; border-color: var(--sapphire2); }
+.comment-send-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--sapphire); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.comment-send-btn svg { width: 15px; height: 15px; }
+.commenter-name-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.commenter-input { flex: 1; border: 1px solid var(--paper3); border-radius: 6px; padding: 5px 8px; font-size: 12px; font-family: var(--font); color: var(--ink); background: white; }
+.commenter-input:focus { outline: none; border-color: var(--sapphire2); }
+.commenter-label { font-size: 11px; color: var(--ink4); white-space: nowrap; font-weight: 500; }
+
+/* —— Attachments Section —— */
+.attach-section { border-top: 1px solid var(--paper2); }
+.attach-toggle { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; background: white; }
+.attach-toggle:hover { background: var(--paper); }
+.attach-toggle-left { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.8px; }
+.attach-toggle-left svg { width: 14px; height: 14px; }
+.attach-count { background: var(--sapphire3); color: var(--sapphire); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; }
+.attach-new-indicator { background: var(--gold); color: white; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px; animation: glow-pulse 1.5s infinite; }
+@keyframes glow-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.attach-chevron { color: var(--ink4); transition: transform 0.2s; }
+.attach-chevron.open { transform: rotate(180deg); }
+.attach-chevron svg { width: 14px; height: 14px; }
+.attach-body { display: none; padding: 0 14px 12px; background: white; }
+.attach-body.open { display: block; }
+.attach-actions { display: flex; gap: 8px; margin-bottom: 10px; }
+.attach-action-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--paper3); background: white; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--ink2); font-family: var(--font); flex: 1; justify-content: center; }
+.attach-action-btn:hover { background: var(--paper); border-color: var(--sapphire2); color: var(--sapphire); }
+.attach-action-btn svg { width: 15px; height: 15px; }
+.attach-file-input { display: none; }
+.attach-list { display: flex; flex-direction: column; gap: 7px; }
+.attach-item { border: 0.5px solid var(--paper3); border-radius: 8px; overflow: hidden; background: white; }
+.attach-item.new-today { border-color: var(--gold); border-width: 1.5px; }
+.attach-item-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; }
+.attach-thumb { width: 42px; height: 42px; border-radius: 6px; object-fit: cover; flex-shrink: 0; cursor: pointer; }
+.attach-thumb-placeholder { width: 42px; height: 42px; border-radius: 6px; background: var(--sapphire3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.attach-thumb-placeholder svg { width: 20px; height: 20px; color: var(--sapphire); }
+.attach-info { flex: 1; min-width: 0; }
+.attach-name { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attach-meta { font-size: 10px; color: var(--ink4); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+.attach-date-badge { background: var(--gold); color: white; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
+.attach-del-btn { background: none; border: none; cursor: pointer; color: var(--ink4); padding: 4px; }
+.attach-del-btn:hover { color: var(--crimson2); }
+.attach-del-btn svg { width: 13px; height: 13px; }
+.attach-img-preview { width: 100%; max-height: 200px; object-fit: contain; border-top: 0.5px solid var(--paper3); display: none; cursor: pointer; }
+
+/* —— Attachment Action Buttons —— */
+.attach-item-actions { display:flex; gap:6px; padding:6px 10px 8px; border-top:0.5px solid var(--paper2); background:var(--paper); }
+.attach-act-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:5px; padding:7px 10px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font); border:1.5px solid var(--paper3); background:white; color:var(--ink2); transition:all 0.15s; }
+.attach-act-btn:hover { border-color:var(--sapphire2); color:var(--sapphire); background:var(--sapphire3); }
+.attach-act-btn.share { border-color:var(--emerald2); color:var(--emerald); }
+.attach-act-btn.share:hover { background:var(--emerald3); }
+.attach-act-btn svg { width:13px; height:13px; flex-shrink:0; }
+.img-viewer-bg { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:600; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0; }
+.img-viewer-topbar { position:absolute; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:linear-gradient(to bottom,rgba(0,0,0,0.7),transparent); }
+.img-viewer-name { font-size:14px; font-weight:600; color:white; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-right:10px; }
+.img-viewer-actions { display:flex; gap:8px; }
+.img-viewer-btn { display:flex; align-items:center; gap:5px; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; font-family:var(--font); border:none; }
+.img-viewer-btn.download { background:var(--gold); color:white; }
+.img-viewer-btn.share { background:var(--emerald); color:white; }
+.img-viewer-btn.close { background:rgba(255,255,255,0.15); color:white; }
+.img-viewer-btn svg { width:14px; height:14px; }
+.img-viewer-img { max-width:100%; max-height:calc(100vh - 120px); object-fit:contain; border-radius:4px; margin-top:52px; }
+.attach-empty { text-align: center; padding: 18px; color: var(--ink4); font-size: 12px; }
+
+/* Name Dialog */
+.name-dialog-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.name-dialog { background: white; border-radius: 16px; padding: 22px; width: 100%; max-width: 340px; box-shadow: var(--shadow-lg); }
+.name-dialog-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+.name-dialog-sub { font-size: 13px; color: var(--ink3); margin-bottom: 14px; }
+.name-dialog-input { width: 100%; border: 1.5px solid var(--paper3); border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: var(--font); color: var(--ink); background: var(--paper); margin-bottom: 12px; }
+.name-dialog-input:focus { outline: none; border-color: var(--gold); background: white; }
+.name-dialog-btns { display: flex; gap: 8px; }
+.name-dialog-btn { flex: 1; padding: 11px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: var(--font); border: none; }
+.name-dialog-btn.primary { background: var(--ink); color: var(--gold2); }
+.name-dialog-btn.secondary { background: var(--paper2); color: var(--ink3); }
+
+/* Advance row */
+.advance-row { display: flex; align-items: center; padding: 10px 14px; border-top: 1px solid var(--paper2); background: #fef9ec; gap: 10px; }
 .advance-note { font-size: 12px; color: var(--gold); font-weight: 500; flex: 1; }
-.advance-btn { display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; border: none; background: var(--gold); color: white; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: var(--font); letter-spacing: -0.2px; }
-.advance-btn:hover { background: var(--gold2); transform: scale(1.02); }
-.advance-btn:active { transform: scale(0.98); }
-.advance-btn svg { width:14px; height:14px; }
+.advance-btn { display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; border: none; background: var(--gold); color: white; font-size: 13px; font-weight: 700; cursor: pointer; font-family: var(--font); }
+.advance-btn:hover { background: var(--gold2); }
+.advance-btn svg { width: 14px; height: 14px; }
 
-/* Edit button */
-.edit-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--paper2); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink3); flex-shrink: 0; }
-.edit-btn svg { width: 13px; height: 13px; }
-
-/* Card top bar — just edit btn, no Sr badge */
-.card-topbar { display: flex; align-items: center; justify-content: flex-end; padding: 8px 12px 0; }
-
-/* Modals / Sheet */
+/* Sheets / Overlays */
 .overlay { position: fixed; inset: 0; background: rgba(15,17,23,0.7); z-index: 200; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .overlay.open { opacity: 1; pointer-events: all; }
 .sheet { background: white; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; padding: 0 0 env(safe-area-inset-bottom,16px); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.1,0.64,1); max-height: 90vh; overflow-y: auto; }
@@ -156,13 +252,15 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .sheet-body { padding: 16px 20px; }
 .form-field { margin-bottom: 14px; }
 .form-label { display: block; font-size: 11px; font-weight: 600; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 5px; }
-.form-input, .form-textarea { width: 100%; border: 1.5px solid var(--paper3); border-radius: 10px; padding: 11px 13px; font-size: 15px; font-family: var(--font); color: var(--ink); background: var(--paper); appearance: none; transition: border-color 0.15s; font-weight: 400; }
+.form-input, .form-textarea { width: 100%; border: 1.5px solid var(--paper3); border-radius: 10px; padding: 11px 13px; font-size: 15px; font-family: var(--font); color: var(--ink); background: var(--paper); appearance: none; }
 .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--gold); background: white; }
 .form-textarea { resize: vertical; min-height: 72px; }
-.btn-primary { width: 100%; padding: 14px; background: var(--ink); color: var(--gold2); border: none; border-radius: 12px; font-size: 15px; font-weight: 700; font-family: var(--font); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; letter-spacing: -0.2px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-primary { width: 100%; padding: 14px; background: var(--ink); color: var(--gold2); border: none; border-radius: 12px; font-size: 15px; font-weight: 700; font-family: var(--font); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; }
 .btn-primary svg { width: 16px; height: 16px; }
+.btn-danger { width: 100%; padding: 12px; background: white; color: var(--crimson2); border: 1.5px solid var(--crimson3); border-radius: 12px; font-size: 14px; font-weight: 600; font-family: var(--font); cursor: pointer; margin-top: 8px; }
 
-/* Full Calendar Modal */
+/* Calendar Modal */
 .cal-modal-overlay { position: fixed; inset: 0; background: rgba(15,17,23,0.8); z-index: 300; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; padding: 20px; }
 .cal-modal-overlay.open { opacity: 1; pointer-events: all; }
 .cal-modal { background: white; border-radius: 20px; padding: 24px; width: 100%; max-width: 380px; transform: scale(0.92); transition: transform 0.25s cubic-bezier(0.34,1.1,0.64,1); }
@@ -186,20 +284,25 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { background: var(--emerald); }
 .toast.warning { background: var(--amber2); }
+.toast.error { background: var(--crimson2); }
 
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
 .main-content { padding-bottom: 80px; }
 </style>
 </head>
 <body>
 
+<!-- App Header -->
 <header class="app-header">
   <div class="header-inner">
     <div class="brand">
       <div class="brand-seal">AUC</div>
-      <div>
-        <div class="brand-name">AUC | Law</div>
-        <div class="brand-sub">Court Cause List</div>
-      </div>
+      <div><div class="brand-name">AUC | Law</div><div class="brand-sub">Court Cause List</div></div>
+    </div>
+    <div class="sync-wrap">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span class="sync-label" id="sync-label">Connecting…</span>
     </div>
     <button class="header-date-btn" onclick="openCalModal()">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -211,17 +314,9 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
   </div>
 </header>
 
-<div class="cal-strip">
-  <div class="cal-inner" id="cal-strip-inner"></div>
-</div>
-
-<div class="stats-bar">
-  <div class="stats-inner" id="stats-bar"></div>
-</div>
-
-<div class="main-content">
-  <div class="date-section" id="main-cases"></div>
-</div>
+<div class="cal-strip"><div class="cal-inner" id="cal-strip-inner"></div></div>
+<div class="stats-bar"><div class="stats-inner" id="stats-bar"></div></div>
+<div class="main-content"><div class="date-section" id="main-cases"></div></div>
 
 <!-- Add/Edit Sheet -->
 <div class="overlay" id="add-overlay" onclick="handleOverlayClick(event,'add-overlay')">
@@ -229,65 +324,76 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
     <div class="sheet-handle"></div>
     <div class="sheet-header">
       <div class="sheet-title" id="sheet-title">Add New Case</div>
-      <button class="sheet-close" onclick="closeSheet('add-overlay')">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
+      <button class="sheet-close" onclick="closeSheet('add-overlay')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="sheet-body">
       <input type="hidden" id="edit-id">
-      <div class="form-field">
-        <label class="form-label">Hearing Date *</label>
-        <input type="date" class="form-input" id="f-date">
+      <div class="form-field"><label class="form-label">Hearing Date *</label><input type="date" class="form-input" id="f-date"></div>
+      <div class="form-field"><label class="form-label">Case Title *</label><input type="text" class="form-input" id="f-title" placeholder="e.g. Ahmad v. Federation of Pakistan"></div>
+      <div class="form-row">
+        <div class="form-field"><label class="form-label">Judge Name *</label><input type="text" class="form-input" id="f-judge" placeholder="Hon'ble Mr. Justice..."></div>
+        <div class="form-field"><label class="form-label">Judge Room</label><input type="text" class="form-input" id="f-room" placeholder="e.g. Court Room 4"></div>
       </div>
-      <div class="form-field">
-        <label class="form-label">Case Title *</label>
-        <input type="text" class="form-input" id="f-title" placeholder="e.g. Ahmad v. Federation of Pakistan">
-      </div>
-      <div class="form-field">
-        <label class="form-label">Judge Name *</label>
-        <input type="text" class="form-input" id="f-judge" placeholder="e.g. Hon'ble Mr. Justice Sardar Tariq Masood">
-      </div>
-      <div class="form-field">
-        <label class="form-label">Proceedings / Stage</label>
-        <textarea class="form-textarea" id="f-proceedings" placeholder="e.g. Arguments on maintainability, Stay application pending"></textarea>
-      </div>
-      <button class="btn-primary" onclick="saveCase()">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
-        Save Case
-      </button>
+      <div class="form-field"><label class="form-label">Proceedings / Stage</label><textarea class="form-textarea" id="f-proceedings" placeholder="e.g. Arguments on maintainability"></textarea></div>
+      <button class="btn-primary" onclick="saveCase()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>Save Case</button>
+      <button class="btn-danger" id="delete-btn" style="display:none" onclick="deleteCase()">Delete This Case</button>
     </div>
   </div>
 </div>
 
-<!-- Full Calendar -->
+<!-- Full Calendar Modal -->
 <div class="cal-modal-overlay" id="cal-modal-overlay" onclick="handleOverlayClick(event,'cal-modal-overlay')">
   <div class="cal-modal">
     <div class="cal-nav">
-      <button class="cal-nav-btn" onclick="calNav(-1)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
+      <button class="cal-nav-btn" onclick="calNav(-1)"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
       <div class="cal-month-label" id="cal-month-label"></div>
-      <button class="cal-nav-btn" onclick="calNav(1)">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
+      <button class="cal-nav-btn" onclick="calNav(1)"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
     <button onclick="closeCalModal()" style="width:100%;margin-top:16px;padding:11px;border:1px solid var(--paper3);border-radius:10px;background:white;font-size:14px;cursor:pointer;font-family:var(--font);color:var(--ink3);font-weight:500">Close</button>
   </div>
 </div>
 
+<!-- Name Dialog for Attachments -->
+<div id="name-dialog" style="display:none">
+  <div class="name-dialog-bg">
+    <div class="name-dialog">
+      <div class="name-dialog-title">Name this attachment</div>
+      <div class="name-dialog-sub">Give a descriptive name so it's easy to find later.</div>
+      <input type="text" class="name-dialog-input" id="attach-name-input" placeholder="e.g. Vakalatnama, Court Order, Site Photo...">
+      <div class="name-dialog-btns">
+        <button class="name-dialog-btn secondary" onclick="cancelAttach()">Cancel</button>
+        <button class="name-dialog-btn primary" onclick="confirmAttach()">Save Attachment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="img-viewer" style="display:none">
+  <div class="img-viewer-bg">
+    <div class="img-viewer-topbar">
+      <div class="img-viewer-name" id="iv-name"></div>
+      <div class="img-viewer-actions">
+        <button class="img-viewer-btn download" onclick="downloadAttach()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Save</button>
+        <button class="img-viewer-btn share" onclick="shareAttach()" id="iv-share-btn"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>
+        <button class="img-viewer-btn close" onclick="closeImgViewer()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>Close</button>
+      </div>
+    </div>
+    <img class="img-viewer-img" id="iv-img" src="" alt="">
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js';
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js';
+<!-- Hidden file inputs -->
+<input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="handleAttachFile(event)">
+<input type="file" id="gallery-input" accept="image/*,application/pdf,.doc,.docx" style="display:none" onchange="handleAttachFile(event)">
 
-/* ─────────────────────────────────────────────────────────────
-   FIREBASE CONFIG — paste the config from your Firebase project:
-     Firebase Console → Project Settings → General →
-     Your apps → Web app → "SDK setup and configuration" → Config
-   Replace every PASTE_… value below, then redeploy.
-   ───────────────────────────────────────────────────────────── */
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ── Baked-in Firebase config (auc-court-tracker) ── */
 const firebaseConfig = {
   apiKey: "AIzaSyAckd8M6zw5fadpe9OZBfEop-X4vzA-km8",
   authDomain: "auc-court-tracker.firebaseapp.com",
@@ -297,127 +403,98 @@ const firebaseConfig = {
   appId: "1:706635940238:web:6d34a31d044661419b64df",
   measurementId: "G-NW93YG975R"
 };
-/* ───────────────────────────────────────────────────────────── */
 
-const isConfigured = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('PASTE_');
+const COMMENTER_KEY = 'auc_commenter_name';
+const ATTACH_MAX_BYTES = 900_000; // Firestore doc cap is 1 MiB — leave headroom for other fields
 
-if (!isConfigured) {
-  window.addEventListener('DOMContentLoaded', () => {
-    const banner = document.createElement('div');
-    banner.style.cssText = 'background:#fef3c7;color:#92400e;padding:10px 16px;font:13px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;text-align:center;border-bottom:1px solid #fcd34d';
-    banner.innerHTML = '<strong>Firebase not configured.</strong> Cases are saved only on this device until you paste the Firebase config in <code>index.html</code> and redeploy.';
-    document.body.insertBefore(banner, document.body.firstChild);
-  });
-} else {
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const casesCol = collection(db, 'cases');
+let db = null, casesCol = null;
+let cases = [], selectedDate = todayStr(), calViewDate = new Date(), editingId = null;
+let pendingAttachCaseId = null, pendingAttachFile = null, pendingAttachDataUrl = null;
+let firstSnapshotReceived = false;
 
-  onSnapshot(
-    casesCol,
+/* ── Helpers ── */
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function fmtDMY(d){ if(!d) return ''; const [y,m,day]=d.split('-'); return `${day}-${m}-${y}`; }
+function fmtShort(d){ if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-PK',{day:'2-digit',month:'short'}); }
+function nowLabel(){ return new Date().toLocaleString('en-PK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}); }
+function getCommenterName(){ return localStorage.getItem(COMMENTER_KEY)||''; }
+
+/* ── Firebase init + listen ── */
+function initFirebase(){
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    casesCol = db.collection('cases');
+  } catch(err) {
+    showToast('Firebase init failed: '+err.message, 'error');
+    setSyncStatus('error');
+    return;
+  }
+  setSyncStatus('connecting');
+  casesCol.onSnapshot(
     snap => {
-      const data = snap.docs.map(d => d.data());
-      window.onCasesUpdate?.(data);
+      cases = snap.docs.map(d => d.data());
+      firstSnapshotReceived = true;
+      setSyncStatus(navigator.onLine ? 'live' : 'offline');
+      render();
     },
     err => {
       console.error('Firestore listen error:', err);
-      window.showToast?.('Sync error — check Firestore rules', 'warning');
+      setSyncStatus('error');
+      showToast('Sync error: '+err.message,'error');
     }
   );
-
-  window.fbSave = (c) => setDoc(doc(casesCol, c.id), c).catch(e => {
-    console.error('Firestore save failed:', e);
-    window.showToast?.('Save failed — check connection', 'warning');
-  });
-  window.fbDelete = (id) => deleteDoc(doc(casesCol, id)).catch(e => {
-    console.error('Firestore delete failed:', e);
-  });
-}
-</script>
-
-<script>
-const DB_KEY = 'auc_court_cases_v5';
-let cases = [], selectedDate = todayStr(), calViewDate = new Date(), editingId = null;
-
-function todayStr() { return new Date().toISOString().split('T')[0]; }
-
-// DD-MM-YYYY display format
-function fmtDMY(d) {
-  if(!d) return '';
-  const [y,m,day] = d.split('-');
-  return `${day}-${m}-${y}`;
-}
-function fmtLong(d) {
-  if(!d) return '';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-PK', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
-}
-function fmtShort(d) {
-  if(!d) return '';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-PK', { day:'2-digit', month:'short' });
+  window.addEventListener('online',  () => firstSnapshotReceived && setSyncStatus('live'));
+  window.addEventListener('offline', () => setSyncStatus('offline'));
 }
 
-function load() {
-  try { const r = localStorage.getItem(DB_KEY); if(r) cases = JSON.parse(r); } catch(e) { cases = []; }
-}
-function saveCache() { try { localStorage.setItem(DB_KEY, JSON.stringify(cases)); } catch(e) {} }
-function persist(c) {
-  saveCache();
-  if (c) window.fbSave?.(c);
-}
-
-// Firestore snapshot listener calls this whenever the shared collection changes.
-window.onCasesUpdate = (data) => {
-  cases = data;
-  saveCache();
-  render();
-};
-
-function render() { renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); }
-
-function updateHeaderDate() {
-  document.getElementById('header-date-label').textContent =
-    selectedDate === todayStr() ? 'Today' : fmtShort(selectedDate);
+function setSyncStatus(state){
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if(!dot || !lbl) return;
+  dot.className = 'sync-dot';
+  lbl.className = 'sync-label';
+  if(state==='live')      { dot.classList.add('live');  lbl.classList.add('live'); lbl.textContent = 'Live'; }
+  else if(state==='error'){ dot.classList.add('error'); lbl.textContent = 'Error'; }
+  else if(state==='offline'){ dot.classList.add('error'); lbl.textContent = 'Offline'; }
+  else                    { lbl.textContent = 'Connecting…'; }
 }
 
-function renderCalStrip() {
+function saveToFirebase(c){ return casesCol.doc(c.id).set(c); }
+function deleteFromFirebase(id){ return casesCol.doc(id).delete(); }
+
+/* ── Render ── */
+function render(){ renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); }
+
+function updateHeaderDate(){
+  document.getElementById('header-date-label').textContent = selectedDate===todayStr() ? 'Today' : fmtShort(selectedDate);
+}
+
+function renderCalStrip(){
   const container = document.getElementById('cal-strip-inner');
-  const today = new Date();
-  container.innerHTML = '';
-
-  // Full calendar button
-  const eb = document.createElement('button');
-  eb.className = 'cal-expand-btn';
+  const today = new Date(); container.innerHTML = '';
+  const eb = document.createElement('button'); eb.className = 'cal-expand-btn';
   eb.innerHTML = `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span style="font-size:9px;color:var(--ink4)">Full</span>`;
-  eb.onclick = openCalModal;
-  container.appendChild(eb);
-
-  for(let i = -3; i <= 14; i++) {
-    const d = new Date(today); d.setDate(today.getDate() + i);
+  eb.onclick = openCalModal; container.appendChild(eb);
+  for(let i=-3; i<=14; i++){
+    const d = new Date(today); d.setDate(today.getDate()+i);
     const ds = d.toISOString().split('T')[0];
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const hasCases = cases.some(c => c.date === ds || c.nextDate === ds);
-    const isActive = ds === selectedDate;
-    const isToday = ds === todayStr();
+    const hasCases = cases.some(c => c.date===ds || c.nextDate===ds);
+    const isActive = ds===selectedDate, isToday = ds===todayStr();
     const div = document.createElement('div');
     div.className = 'cal-day' + (isActive?' active':'') + (hasCases?' has-cases':'');
     div.innerHTML = `<span class="day-name">${dayNames[d.getDay()]}</span><span class="day-num" style="${isToday&&!isActive?'color:var(--gold2)':''}">${d.getDate()}</span>${hasCases?'<span class="day-dot"></span>':''}`;
     div.onclick = () => { selectedDate = ds; render(); window.scrollTo({top:0,behavior:'smooth'}); };
     container.appendChild(div);
   }
-  setTimeout(() => {
-    const a = container.querySelector('.active');
-    if(a) a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  }, 50);
+  setTimeout(() => { const a = container.querySelector('.active'); if(a) a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }, 50);
 }
 
-function renderStats() {
-  const dc = cases.filter(c => c.date === selectedDate);
-  const total = dc.length;
-  const present = dc.filter(c=>c.judgeStatus==='Y').length;
-  const absent = dc.filter(c=>c.judgeStatus==='N').length;
-  const withNext = dc.filter(c=>c.nextDate).length;
+function renderStats(){
+  const dc = cases.filter(c => c.date===selectedDate);
+  const total = dc.length, present = dc.filter(c=>c.judgeStatus==='Y').length;
+  const absent = dc.filter(c=>c.judgeStatus==='N').length, withNext = dc.filter(c=>c.nextDate).length;
   document.getElementById('stats-bar').innerHTML = `
     <div class="stat-pill"><div class="stat-dot" style="background:var(--ink2)"></div><span class="stat-num">${total}</span> Cases</div>
     <div class="stat-pill"><div class="stat-dot" style="background:var(--emerald)"></div><span class="stat-num">${present}</span> Judge Present</div>
@@ -425,76 +502,64 @@ function renderStats() {
     <div class="stat-pill"><div class="stat-dot" style="background:var(--gold)"></div><span class="stat-num">${withNext}</span> Next Date Set</div>`;
 }
 
-function renderCases() {
+function renderCases(){
   const container = document.getElementById('main-cases');
-  // Show cases whose .date === selectedDate — nextDate selection does NOT move them here
-  const dc = cases.filter(c => c.date === selectedDate).sort((a,b)=>(a.srNo||9999)-(b.srNo||9999));
-
-  if(!dc.length) {
-    container.innerHTML = `
-      <div class="date-heading">
-        <div class="date-heading-line"></div>
-        <div class="date-heading-text">${fmtDMY(selectedDate)}</div>
-        <div class="date-heading-line"></div>
-      </div>
-      <div class="no-cases">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        <p>No cases scheduled for this date.</p>
-        <p style="margin-top:6px;font-size:12px">Tap + to add a case.</p>
-      </div>`;
+  const dc = cases.filter(c => c.date===selectedDate).sort((a,b) => (a.srNo||9999) - (b.srNo||9999));
+  if(!dc.length){
+    container.innerHTML = `<div class="date-heading"><div class="date-heading-line"></div><div class="date-heading-text">${fmtDMY(selectedDate)}</div><div class="date-heading-line"></div></div>
+    <div class="no-cases"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><p>No cases scheduled for this date.</p><p style="margin-top:6px;font-size:12px">Tap + to add a case.</p></div>`;
     return;
   }
-
-  let html = `<div class="date-heading">
-    <div class="date-heading-line"></div>
-    <div class="date-heading-text">${fmtDMY(selectedDate)}</div>
-    <span class="date-badge">${dc.length} case${dc.length>1?'s':''}</span>
-    <div class="date-heading-line"></div>
-  </div>`;
-
+  let html = `<div class="date-heading"><div class="date-heading-line"></div><div class="date-heading-text">${fmtDMY(selectedDate)}</div><span class="date-badge">${dc.length} case${dc.length>1?'s':''}</span><div class="date-heading-line"></div></div>`;
   dc.forEach(c => {
-    const judgeChip = c.judgeStatus==='Y'
-      ? `<span class="status-chip present">Present</span>`
-      : c.judgeStatus==='N'
-      ? `<span class="status-chip absent">Absent</span>`
-      : `<span class="status-chip unknown">Unknown</span>`;
+    const judgeChip = c.judgeStatus==='Y' ? `<span class="status-chip present">Present</span>` : c.judgeStatus==='N' ? `<span class="status-chip absent">Absent</span>` : `<span class="status-chip unknown">Unknown</span>`;
+    const lastDateHtml = c.lastDate ? `<span class="last-date-val">${fmtDMY(c.lastDate)}</span>` : `<span class="last-date-val empty">—</span>`;
+    const comments = c.comments || [];
+    const attachments = c.attachments || [];
+    const todayAttach = attachments.filter(a => a.addedDate===todayStr());
+    const attachCount = attachments.length;
+    const hasNewToday = todayAttach.length>0 && c.date!==todayStr();
 
-    // Last date: empty dash on first entry, populated after Advance
-    const lastDateHtml = c.lastDate
-      ? `<span class="last-date-val">${fmtDMY(c.lastDate)}</span>`
-      : `<span class="last-date-val empty">—</span>`;
-
-    // Card border highlights gold when next date is set (but case stays here until Advance)
-    const cardClass = c.nextDate ? 'case-card next-set' : 'case-card';
-
-    html += `<div class="${cardClass}" id="card-${c.id}">
+    html += `<div class="case-card ${c.nextDate?'next-set':''}" id="card-${c.id}">
 
       <div class="card-topbar">
-        <button class="edit-btn" onclick="editCase('${c.id}')" title="Edit case">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        </button>
+        ${attachCount>0 ? `<div style="display:flex;align-items:center;gap:4px;margin-right:auto">
+          ${hasNewToday?`<span class="new-attach-badge"><svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>New</span>`:''}
+        </div>` : '<div style="margin-right:auto"></div>'}
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="icon-btn" onclick="openAttachSection('${c.id}')" title="Attachments" style="position:relative">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+            ${attachCount>0?`<span class="attach-badge">${attachCount}</span>`:''}
+          </button>
+          <button class="icon-btn" onclick="editCase('${c.id}')" title="Edit">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </button>
+        </div>
       </div>
 
-      <div class="case-title-wrap">
-        <div class="case-title">${c.title}</div>
-      </div>
+      <div class="case-title-wrap"><div class="case-title">${c.title}</div></div>
 
       <div class="case-body">
-        <div class="meta-item">
-          <span class="meta-label">Judge</span>
-          <span class="meta-value judge">${c.judge}</span>
+        <div class="judge-room-row">
+          <div class="meta-item">
+            <span class="meta-label">Judge</span>
+            <span class="meta-value judge">${c.judge}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Judge Room</span>
+            <span class="meta-value room">${c.room||'—'}</span>
+          </div>
         </div>
         <div class="meta-item" style="margin-bottom:0">
           <span class="meta-label">Proceedings</span>
-          <span class="meta-value proceedings">${c.proceedings || '—'}</span>
+          <span class="meta-value proceedings">${c.proceedings||'—'}</span>
         </div>
       </div>
 
       <div class="case-actions">
         <div class="sr-field">
           <span class="sr-input-label">Sr #</span>
-          <input type="number" class="sr-input" value="${c.srNo||''}" placeholder="—"
-            onchange="updateSr('${c.id}', this.value)" min="1" max="999">
+          <input type="number" class="sr-input" value="${c.srNo||''}" placeholder="—" onchange="updateSr('${c.id}',this.value)" min="1" max="999">
         </div>
         <div class="judge-status-wrap">
           <span class="judge-label">Judge</span>
@@ -505,163 +570,435 @@ function renderCases() {
       </div>
 
       <div class="dates-row">
-        <div class="date-field">
-          <span class="date-field-label">Last Date</span>
-          ${lastDateHtml}
-        </div>
-        <div class="date-field">
-          <span class="date-field-label">Next Date</span>
-          <input type="date" class="next-date-picker ${c.nextDate?'set':''}"
-            value="${c.nextDate||''}"
-            onchange="setNextDate('${c.id}', this.value)"
-            id="nd-${c.id}">
+        <div class="date-field"><span class="date-field-label">Last Date</span>${lastDateHtml}</div>
+        <div class="date-field"><span class="date-field-label">Next Date</span>
+          <input type="date" class="next-date-picker ${c.nextDate?'set':''}" value="${c.nextDate||''}" onchange="setNextDate('${c.id}',this.value)">
         </div>
       </div>
 
-      ${c.nextDate ? `
-      <div class="advance-row">
-        <span class="advance-note">Next hearing: ${fmtDMY(c.nextDate)} — press Advance when ready</span>
-        <button class="advance-btn" onclick="advanceCase('${c.id}')">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-          Advance
-        </button>
-      </div>` : ''}
+      <!-- Comments Section -->
+      <div class="comments-section">
+        <div class="comments-header">
+          <span class="comments-title">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            Comments ${comments.length>0?`<span style="background:var(--sapphire3);color:var(--sapphire);font-size:10px;font-weight:700;padding:1px 7px;border-radius:99px;font-style:normal">${comments.length}</span>`:''}
+          </span>
+        </div>
+        ${comments.length>0 ? `<div class="comment-list">${comments.map((cm,idx) => `
+          <div class="comment-item">
+            <div class="comment-meta">
+              <span class="comment-author">${cm.author||'Team'}</span>
+              <span class="comment-time">${cm.time||''}</span>
+            </div>
+            <div class="comment-text">${cm.text}</div>
+            <button class="comment-del" onclick="deleteComment('${c.id}',${idx})" title="Delete comment">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>`).join('')}</div>` : ''}
+        <div class="commenter-name-wrap">
+          <span class="commenter-label">Your name:</span>
+          <input type="text" class="commenter-input" id="commenter-${c.id}" value="${getCommenterName()}" placeholder="Enter your name" onchange="saveCommenterName(this.value)">
+        </div>
+        <div class="comment-input-wrap">
+          <textarea class="comment-input" id="comment-input-${c.id}" placeholder="Type a comment…" rows="1" oninput="autoResize(this)"></textarea>
+          <button class="comment-send-btn" onclick="addComment('${c.id}')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
 
+      <!-- Attachments Section -->
+      <div class="attach-section" id="attach-section-${c.id}">
+        <div class="attach-toggle" onclick="toggleAttach('${c.id}')">
+          <div class="attach-toggle-left">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+            See Attachments
+            ${attachCount>0?`<span class="attach-count">${attachCount}</span>`:''}
+            ${hasNewToday?`<span class="attach-new-indicator">New today</span>`:''}
+          </div>
+          <span class="attach-chevron" id="attach-chevron-${c.id}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+        </div>
+        <div class="attach-body" id="attach-body-${c.id}">
+          <div class="attach-actions">
+            <button class="attach-action-btn" onclick="triggerCamera('${c.id}')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Take Photo
+            </button>
+            <button class="attach-action-btn" onclick="triggerGallery('${c.id}')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Upload File
+            </button>
+          </div>
+          <div class="attach-list">
+            ${attachments.length===0?`<div class="attach-empty">No attachments yet</div>`:''}
+            ${attachments.map((a,idx) => {
+              const isImg = a.dataUrl && a.type && a.type.startsWith('image/');
+              const hasData = !!a.dataUrl;
+              return `<div class="attach-item ${a.addedDate===todayStr()&&c.date!==todayStr()?'new-today':''}" id="atch-${c.id}-${idx}">
+                <div class="attach-item-header">
+                  ${isImg?`<img src="${a.dataUrl}" class="attach-thumb" onclick="openViewer('${c.id}',${idx})" alt="${a.name}" title="Tap to view">`:`<div class="attach-thumb-placeholder" style="${hasData?'cursor:pointer':''}" onclick="${hasData?`openViewer('${c.id}',${idx})`:''}" title="${hasData?'Tap to open':''}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`}
+                  <div class="attach-info">
+                    <div class="attach-name">${a.name}</div>
+                    <div class="attach-meta"><span>${a.addedDate?fmtDMY(a.addedDate):''}</span>${a.addedDate===todayStr()?`<span class="attach-date-badge">Today</span>`:''}<span>${a.addedBy||''}</span></div>
+                  </div>
+                  <button class="attach-del-btn" onclick="deleteAttach('${c.id}',${idx})" title="Delete"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+                </div>
+                <div class="attach-item-actions">
+                  <button class="attach-act-btn" onclick="openViewer('${c.id}',${idx})"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Open</button>
+                  <button class="attach-act-btn" onclick="downloadSingleAttach('${c.id}',${idx})"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Save</button>
+                  <button class="attach-act-btn share" onclick="shareSingleAttach('${c.id}',${idx})"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share</button>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      ${c.nextDate ? `<div class="advance-row"><span class="advance-note">Next hearing: ${fmtDMY(c.nextDate)} — press Advance when ready</span><button class="advance-btn" onclick="advanceCase('${c.id}')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Advance</button></div>` : ''}
     </div>`;
   });
-
   container.innerHTML = html;
 }
 
 /* ── Actions ── */
-function updateSr(id, val) {
-  const c = cases.find(x=>x.id===id); if(!c) return;
-  c.srNo = parseInt(val)||null; persist(c);
-  showToast('Sr # updated','success');
+function updateSr(id,val){
+  const c = cases.find(x => x.id===id); if(!c) return;
+  c.srNo = parseInt(val)||null;
+  saveToFirebase(c).then(() => showToast('Sr # updated','success')).catch(e => showToast('Error: '+e.message,'error'));
 }
 
-function setJudgeStatus(id, status) {
-  const c = cases.find(x=>x.id===id); if(!c) return;
+function setJudgeStatus(id,status){
+  const c = cases.find(x => x.id===id); if(!c) return;
   c.judgeStatus = c.judgeStatus===status ? null : status;
-  persist(c); render();
-  showToast(c.judgeStatus==='Y'?'Judge marked present':c.judgeStatus==='N'?'Judge marked absent':'Status cleared','success');
+  saveToFirebase(c)
+    .then(() => showToast(c.judgeStatus==='Y'?'Judge marked present':c.judgeStatus==='N'?'Judge marked absent':'Status cleared','success'))
+    .catch(e => showToast('Error: '+e.message,'error'));
 }
 
-function setNextDate(id, val) {
-  const c = cases.find(x=>x.id===id); if(!c) return;
+function setNextDate(id,val){
+  const c = cases.find(x => x.id===id); if(!c) return;
   c.nextDate = val||null;
-  // Case STAYS on current date — only Advance button moves it
-  persist(c); render();
-  if(val) showToast('Next date noted: '+fmtDMY(val),'success');
+  saveToFirebase(c)
+    .then(() => { if(val) showToast('Next date noted: '+fmtDMY(val),'success'); })
+    .catch(e => showToast('Error: '+e.message,'error'));
 }
 
-function advanceCase(id) {
-  const c = cases.find(x=>x.id===id);
-  if(!c||!c.nextDate) { showToast('Set next date first','warning'); return; }
+function advanceCase(id){
+  const c = cases.find(x => x.id===id);
+  if(!c||!c.nextDate){ showToast('Set next date first','warning'); return; }
   const newDate = c.nextDate;
-  c.lastDate = c.date;      // current hearing date saved as last date
-  c.date = newDate;          // case now moves to next date
-  c.nextDate = null;
-  c.judgeStatus = null;
-  c.srNo = null;
-  c.done = false;
-  persist(c);
-  selectedDate = newDate;
-  render();
-  showToast('Case advanced to '+fmtDMY(newDate),'success');
+  c.lastDate = c.date; c.date = newDate; c.nextDate = null;
+  c.judgeStatus = null; c.srNo = null; c.done = false;
+  c.comments = [];  // clear comments for new hearing date
+  saveToFirebase(c)
+    .then(() => { selectedDate = newDate; render(); showToast('Case advanced to '+fmtDMY(newDate),'success'); })
+    .catch(e => showToast('Error: '+e.message,'error'));
 }
 
-/* ── Add / Edit ── */
-function openAddSheet() {
+/* ── Comments ── */
+function saveCommenterName(val){ localStorage.setItem(COMMENTER_KEY, val.trim()); }
+
+function autoResize(el){ el.style.height='auto'; el.style.height = Math.min(el.scrollHeight,100)+'px'; }
+
+function addComment(caseId){
+  const c = cases.find(x => x.id===caseId); if(!c) return;
+  const inp = document.getElementById('comment-input-'+caseId);
+  const nameInp = document.getElementById('commenter-'+caseId);
+  const text = inp ? inp.value.trim() : '';
+  const author = nameInp ? nameInp.value.trim() : 'Team';
+  if(!text){ showToast('Type a comment first','warning'); return; }
+  if(!c.comments) c.comments = [];
+  c.comments.push({ text, author: author||'Team', time: nowLabel(), id: Date.now().toString() });
+  saveToFirebase(c)
+    .then(() => showToast('Comment added','success'))
+    .catch(e => showToast('Error: '+e.message,'error'));
+}
+
+function deleteComment(caseId,idx){
+  const c = cases.find(x => x.id===caseId); if(!c||!c.comments) return;
+  c.comments.splice(idx,1);
+  saveToFirebase(c)
+    .then(() => showToast('Comment deleted','success'))
+    .catch(e => showToast('Error: '+e.message,'error'));
+}
+
+/* ── Attachments ── */
+function openAttachSection(caseId){
+  const body = document.getElementById('attach-body-'+caseId);
+  const chev = document.getElementById('attach-chevron-'+caseId);
+  if(body){ body.classList.toggle('open'); if(chev) chev.classList.toggle('open'); }
+}
+function toggleAttach(caseId){ openAttachSection(caseId); }
+
+function triggerCamera(caseId){ pendingAttachCaseId = caseId; document.getElementById('camera-input').click(); }
+function triggerGallery(caseId){ pendingAttachCaseId = caseId; document.getElementById('gallery-input').click(); }
+
+function approxDataUrlBytes(dataUrl){
+  if(!dataUrl) return 0;
+  const idx = dataUrl.indexOf(',');
+  const b64 = idx >= 0 ? dataUrl.slice(idx+1) : dataUrl;
+  return Math.floor(b64.length * 3 / 4);
+}
+
+// Downscale + re-encode an image dataUrl to JPEG to fit Firestore's 1MB doc limit.
+function compressImageDataUrl(dataUrl, maxDim, quality){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.max(1, Math.round(img.width * scale));
+      const h = Math.max(1, Math.round(img.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => reject(new Error('Could not decode image'));
+    img.src = dataUrl;
+  });
+}
+
+async function handleAttachFile(event){
+  const file = event.target.files[0];
+  event.target.value = '';
+  if(!file || !pendingAttachCaseId){ return; }
+
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    let dataUrl = ev.target.result;
+    let mimeOut = file.type;
+
+    if(file.type && file.type.startsWith('image/')){
+      // Images: try increasingly aggressive compression until under the cap.
+      if(approxDataUrlBytes(dataUrl) > ATTACH_MAX_BYTES){
+        showToast('Compressing image…','');
+        try {
+          dataUrl = await compressImageDataUrl(dataUrl, 1280, 0.75);
+          if(approxDataUrlBytes(dataUrl) > ATTACH_MAX_BYTES){
+            dataUrl = await compressImageDataUrl(dataUrl, 1024, 0.6);
+          }
+          if(approxDataUrlBytes(dataUrl) > ATTACH_MAX_BYTES){
+            dataUrl = await compressImageDataUrl(dataUrl, 800, 0.5);
+          }
+          mimeOut = 'image/jpeg';
+        } catch(e){ console.error(e); }
+      }
+    }
+
+    if(approxDataUrlBytes(dataUrl) > ATTACH_MAX_BYTES){
+      const kb = Math.round(approxDataUrlBytes(dataUrl)/1024);
+      showToast(`File too large (${kb} KB). Max ~900 KB per attachment.`,'error');
+      return;
+    }
+
+    pendingAttachFile = file;
+    pendingAttachDataUrl = dataUrl;
+    // remember the compressed mime so we save the right type
+    pendingAttachFile = new File([await (await fetch(dataUrl)).blob()], file.name, { type: mimeOut });
+    document.getElementById('attach-name-input').value = file.name.replace(/\.[^.]+$/,'');
+    document.getElementById('name-dialog').style.display = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function cancelAttach(){
+  pendingAttachCaseId = null; pendingAttachFile = null; pendingAttachDataUrl = null;
+  document.getElementById('name-dialog').style.display = 'none';
+}
+
+function confirmAttach(){
+  const name = document.getElementById('attach-name-input').value.trim();
+  if(!name){ showToast('Please give a name','warning'); return; }
+  if(!pendingAttachCaseId){ cancelAttach(); return; }
+  const c = cases.find(x => x.id===pendingAttachCaseId);
+  if(!c){ cancelAttach(); return; }
+  if(!c.attachments) c.attachments = [];
+  c.attachments.push({
+    name,
+    type: pendingAttachFile ? pendingAttachFile.type : '',
+    dataUrl: pendingAttachDataUrl || null,
+    addedDate: todayStr(),
+    addedBy: getCommenterName()||'Team',
+    id: Date.now().toString()
+  });
+  document.getElementById('name-dialog').style.display = 'none';
+  saveToFirebase(c)
+    .then(() => showToast('Attachment saved','success'))
+    .catch(e => showToast('Error: '+e.message,'error'));
+  pendingAttachCaseId = null; pendingAttachFile = null; pendingAttachDataUrl = null;
+}
+
+function deleteAttach(caseId,idx){
+  const c = cases.find(x => x.id===caseId); if(!c||!c.attachments) return;
+  if(!confirm('Remove this attachment?')) return;
+  c.attachments.splice(idx,1);
+  saveToFirebase(c)
+    .then(() => showToast('Attachment removed','success'))
+    .catch(e => showToast('Error: '+e.message,'error'));
+}
+
+/* ── Add / Edit / Delete ── */
+function openAddSheet(){
   editingId = null;
   document.getElementById('sheet-title').textContent = 'Add New Case';
   document.getElementById('edit-id').value = '';
   document.getElementById('f-date').value = selectedDate;
   document.getElementById('f-title').value = '';
   document.getElementById('f-judge').value = '';
+  document.getElementById('f-room').value = '';
   document.getElementById('f-proceedings').value = '';
+  document.getElementById('delete-btn').style.display = 'none';
   document.getElementById('add-overlay').classList.add('open');
 }
 
-function editCase(id) {
-  const c = cases.find(x=>x.id===id); if(!c) return;
+function editCase(id){
+  const c = cases.find(x => x.id===id); if(!c) return;
   editingId = id;
   document.getElementById('sheet-title').textContent = 'Edit Case';
   document.getElementById('edit-id').value = id;
   document.getElementById('f-date').value = c.date;
   document.getElementById('f-title').value = c.title;
   document.getElementById('f-judge').value = c.judge;
+  document.getElementById('f-room').value = c.room||'';
   document.getElementById('f-proceedings').value = c.proceedings||'';
+  document.getElementById('delete-btn').style.display = '';
   document.getElementById('add-overlay').classList.add('open');
 }
 
-function saveCase() {
+function saveCase(){
   const date = document.getElementById('f-date').value;
   const title = document.getElementById('f-title').value.trim();
   const judge = document.getElementById('f-judge').value.trim();
-  if(!date||!title||!judge) { showToast('Date, Title and Judge are required','warning'); return; }
-  let saved;
-  if(editingId) {
-    saved = cases.find(x=>x.id===editingId);
-    if(saved) { saved.date=date; saved.title=title; saved.judge=judge; saved.proceedings=document.getElementById('f-proceedings').value.trim(); }
+  if(!date||!title||!judge){ showToast('Date, Title and Judge are required','warning'); return; }
+  let rec;
+  if(editingId){
+    rec = cases.find(x => x.id===editingId);
+    if(rec){
+      rec.date = date; rec.title = title; rec.judge = judge;
+      rec.room = document.getElementById('f-room').value.trim();
+      rec.proceedings = document.getElementById('f-proceedings').value.trim();
+    }
   } else {
     const newId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString()+Math.random().toString(36).slice(2,8));
-    saved = { id:newId, date, title, judge,
+    rec = {
+      id: newId, date, title, judge,
+      room: document.getElementById('f-room').value.trim(),
       proceedings: document.getElementById('f-proceedings').value.trim(),
-      srNo:null, judgeStatus:null, nextDate:null, lastDate:null, done:false,
-      created:new Date().toISOString() };
-    cases.push(saved);
+      srNo: null, judgeStatus: null, nextDate: null, lastDate: null, done: false,
+      comments: [], attachments: [],
+      created: new Date().toISOString()
+    };
   }
-  if(saved) persist(saved);
-  selectedDate=date; closeSheet('add-overlay'); render();
-  showToast(editingId?'Case updated':'Case added successfully','success');
+  if(!rec){ return; }
+  saveToFirebase(rec)
+    .then(() => { selectedDate = date; closeSheet('add-overlay'); showToast(editingId?'Case updated':'Case added — synced','success'); })
+    .catch(e => showToast('Error: '+e.message,'error'));
+}
+
+function deleteCase(){
+  if(!editingId) return;
+  if(!confirm('Delete this case permanently?')) return;
+  deleteFromFirebase(editingId)
+    .then(() => { closeSheet('add-overlay'); showToast('Case deleted','success'); })
+    .catch(e => showToast('Error: '+e.message,'error'));
 }
 
 /* ── Calendar ── */
-function openCalModal() {
-  calViewDate = new Date(selectedDate+'T00:00:00');
-  renderCalGrid();
-  document.getElementById('cal-modal-overlay').classList.add('open');
-}
-function closeCalModal() { document.getElementById('cal-modal-overlay').classList.remove('open'); }
-function calNav(dir) { calViewDate.setMonth(calViewDate.getMonth()+dir); renderCalGrid(); }
-function renderCalGrid() {
-  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function openCalModal(){ calViewDate = new Date(selectedDate+'T00:00:00'); renderCalGrid(); document.getElementById('cal-modal-overlay').classList.add('open'); }
+function closeCalModal(){ document.getElementById('cal-modal-overlay').classList.remove('open'); }
+function calNav(dir){ calViewDate.setMonth(calViewDate.getMonth()+dir); renderCalGrid(); }
+function renderCalGrid(){
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-label').textContent = months[calViewDate.getMonth()]+' '+calViewDate.getFullYear();
-  const grid=document.getElementById('cal-grid');
-  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
-  let html=days.map(d=>`<div class="cal-grid-header">${d}</div>`).join('');
-  const first=new Date(calViewDate.getFullYear(),calViewDate.getMonth(),1);
-  const last=new Date(calViewDate.getFullYear(),calViewDate.getMonth()+1,0);
-  const allDates=[...new Set(cases.flatMap(c=>[c.date,c.nextDate].filter(Boolean)))];
-  const today=todayStr();
-  for(let i=0;i<first.getDay();i++){
-    const d=new Date(first); d.setDate(d.getDate()-(first.getDay()-i));
-    const ds=d.toISOString().split('T')[0];
-    html+=`<div class="cal-cell other-month ${allDates.includes(ds)?'has-cases':''} ${ds===selectedDate?'selected':''}" onclick="pickCalDate('${ds}')">${d.getDate()}</div>`;
+  const grid = document.getElementById('cal-grid');
+  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html = days.map(d => `<div class="cal-grid-header">${d}</div>`).join('');
+  const first = new Date(calViewDate.getFullYear(),calViewDate.getMonth(),1);
+  const last = new Date(calViewDate.getFullYear(),calViewDate.getMonth()+1,0);
+  const allDates = [...new Set(cases.flatMap(c => [c.date,c.nextDate].filter(Boolean)))];
+  const today = todayStr();
+  for(let i=0; i<first.getDay(); i++){
+    const d = new Date(first); d.setDate(d.getDate()-(first.getDay()-i));
+    const ds = d.toISOString().split('T')[0];
+    html += `<div class="cal-cell other-month ${allDates.includes(ds)?'has-cases':''} ${ds===selectedDate?'selected':''}" onclick="pickCalDate('${ds}')">${d.getDate()}</div>`;
   }
-  for(let i=1;i<=last.getDate();i++){
-    const d=new Date(calViewDate.getFullYear(),calViewDate.getMonth(),i);
-    const ds=d.toISOString().split('T')[0];
-    html+=`<div class="cal-cell ${ds===today?'today':''} ${allDates.includes(ds)?'has-cases':''} ${ds===selectedDate?'selected':''}" onclick="pickCalDate('${ds}')">${i}</div>`;
+  for(let i=1; i<=last.getDate(); i++){
+    const d = new Date(calViewDate.getFullYear(),calViewDate.getMonth(),i);
+    const ds = d.toISOString().split('T')[0];
+    html += `<div class="cal-cell ${ds===today?'today':''} ${allDates.includes(ds)?'has-cases':''} ${ds===selectedDate?'selected':''}" onclick="pickCalDate('${ds}')">${i}</div>`;
   }
-  grid.innerHTML=html;
+  grid.innerHTML = html;
 }
-function pickCalDate(ds) { selectedDate=ds; closeCalModal(); render(); }
+function pickCalDate(ds){ selectedDate = ds; closeCalModal(); render(); }
 
 /* ── Utils ── */
-function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
-function handleOverlayClick(e,id) { if(e.target.id===id) closeSheet(id); }
+function closeSheet(id){ document.getElementById(id).classList.remove('open'); }
+function handleOverlayClick(e,id){ if(e.target.id===id) closeSheet(id); }
 let toastTimer;
-function showToast(msg,type='') {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast '+type; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+function showToast(msg,type=''){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+type; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// Bootstrap: render cached data instantly; Firestore snapshot will
-// then replace it with the authoritative shared copy when it arrives.
-load(); render();
+/* ── Viewer / Open / Share / Download ── */
+let ivCaseId = null, ivIdx = null;
+function getCaseAttach(caseId,idx){ const c = cases.find(x => x.id===caseId); if(!c||!c.attachments) return null; return c.attachments[idx]||null; }
+
+function openViewer(caseId,idx){
+  const a = getCaseAttach(caseId,idx); if(!a) return;
+  ivCaseId = caseId; ivIdx = idx;
+  if(!a.dataUrl){ showToast('File data not available','warning'); return; }
+  if(a.type && a.type.startsWith('image/')){
+    document.getElementById('iv-name').textContent = a.name;
+    document.getElementById('iv-img').src = a.dataUrl;
+    document.getElementById('iv-img').alt = a.name;
+    const sb = document.getElementById('iv-share-btn'); if(sb) sb.style.display = navigator.share ? '' : 'none';
+    document.getElementById('img-viewer').style.display = '';
+    document.body.style.overflow = 'hidden';
+  } else {
+    const w = window.open();
+    if(w){ w.document.write('<iframe src="'+a.dataUrl+'" style="width:100%;height:100%;border:none;position:fixed;inset:0"></iframe>'); w.document.title = a.name; }
+    else { showToast('Allow pop-ups to open files','warning'); }
+  }
+}
+function closeImgViewer(){ document.getElementById('img-viewer').style.display = 'none'; document.body.style.overflow = ''; ivCaseId = null; ivIdx = null; }
+function downloadAttach(){ if(ivCaseId===null||ivIdx===null) return; const a = getCaseAttach(ivCaseId,ivIdx); if(!a||!a.dataUrl) return; doDownload(a.dataUrl,a.name,a.type); }
+function downloadSingleAttach(caseId,idx){ const a = getCaseAttach(caseId,idx); if(!a||!a.dataUrl){ showToast('No file data to download','warning'); return; } doDownload(a.dataUrl,a.name,a.type); showToast('Saving: '+a.name,'success'); }
+function doDownload(dataUrl,name,type){
+  const ext = type ? '.'+type.split('/')[1].split(';')[0] : '';
+  const filename = name + (name.includes('.') ? '' : ext);
+  const link = document.createElement('a');
+  link.href = dataUrl; link.download = filename;
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+async function shareAttach(){ if(ivCaseId===null||ivIdx===null) return; const a = getCaseAttach(ivCaseId,ivIdx); if(!a||!a.dataUrl) return; await doShare(a); }
+async function shareSingleAttach(caseId,idx){ const a = getCaseAttach(caseId,idx); if(!a){ showToast('Attachment not found','warning'); return; } if(!a.dataUrl){ showToast('No file data to share','warning'); return; } await doShare(a); }
+async function doShare(a){
+  if(!a.dataUrl){ showToast('No file data available','warning'); return; }
+  try {
+    const res = await fetch(a.dataUrl);
+    const blob = await res.blob();
+    const ext = blob.type ? '.'+blob.type.split('/')[1] : '';
+    const filename = a.name + (a.name.includes('.') ? '' : ext);
+    const file = new File([blob], filename, { type: blob.type });
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({ title: a.name, text: 'Attachment: '+a.name+' — AUC | Law Court Cause List', files: [file] });
+      showToast('Shared successfully','success');
+    } else if(navigator.share){
+      await navigator.share({ title: a.name, text: 'Attachment: '+a.name+' from AUC | Law Court Cause List' });
+    } else {
+      showToast('Use Save to download on desktop','warning');
+      doDownload(a.dataUrl,a.name,a.type);
+    }
+  } catch(err){
+    if(err.name !== 'AbortError') showToast('Share failed: '+err.message,'error');
+  }
+}
+
+/* ── Bootstrap ── */
+render();        // paint empty UI immediately
+initFirebase();  // connect; snapshot will repopulate `cases` and call render()
 </script>
 </body>
 </html>
