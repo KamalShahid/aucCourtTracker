@@ -760,7 +760,7 @@ function renderCases(){
             <div class="task-nature">${escapeHtml(t.nature)}</div>
             <div class="task-assignees">
               <span class="task-assignee-chip by"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>By: ${escapeHtml(t.assignedBy||'—')}</span>
-              <span class="task-assignee-chip to"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>To: ${escapeHtml(t.assignedTo||'—')}</span>
+              <span class="task-assignee-chip to"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>To: ${escapeHtml(t.assignedTo||'—')}</span>
             </div>
             <div class="task-meta-row">
               <span class="task-date-label">Assigned: ${t.assignedDate?fmtDMY(t.assignedDate):'—'}</span>
@@ -770,13 +770,13 @@ function renderCases(){
           <button class="task-del-btn" onclick="deleteTask('${c.id}','${t.id}')" title="Remove task"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
         </div>
         <div class="task-attach-row">
-          <span class="task-attach-label">Files:</span>
+          <span class="task-attach-label">📎</span>
           ${tAttachments.map((ta,taidx) => `<span class="task-attach-chip" onclick="openTaskAttachViewer('${c.id}','${t.id}',${taidx})">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             ${escapeHtml(ta.name)}
           </span>`).join('')}
           <span class="task-attach-add" onclick="triggerTaskAttach('${c.id}','${t.id}','camera')">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Photo
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Photo
           </span>
           <span class="task-attach-add" onclick="triggerTaskAttach('${c.id}','${t.id}','file')">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>File
