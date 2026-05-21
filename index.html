@@ -401,6 +401,56 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .panel-empty svg { width: 40px; height: 40px; opacity: 0.25; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
 .panel-empty p { font-size: 14px; }
 
+/* Collapsed/expanded case cards */
+.case-card.collapsed .case-body,
+.case-card.collapsed .case-actions,
+.case-card.collapsed .dates-row,
+.case-card.collapsed .tasks-section,
+.case-card.collapsed .comments-section,
+.case-card.collapsed .attach-section,
+.case-card.collapsed .advance-row { display: none; }
+.case-card.collapsed .case-title-wrap { border-bottom: none; }
+.case-chevron { transition: transform 0.2s; }
+.case-chevron.open { transform: rotate(180deg); }
+.case-title-clickable { cursor: pointer; user-select: none; }
+
+/* Expand-all toggle in date heading */
+.expand-all-btn { background: white; border: 1px solid var(--paper3); color: var(--ink3); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 99px; cursor: pointer; font-family: var(--font); white-space: nowrap; }
+.expand-all-btn:hover { background: var(--paper2); border-color: var(--ink3); color: var(--ink); }
+
+/* Close-case button in edit sheet */
+.btn-warning { width: 100%; padding: 12px; background: var(--amber3); color: var(--amber); border: 1.5px solid var(--amber2); border-radius: 12px; font-size: 14px; font-weight: 600; font-family: var(--font); cursor: pointer; margin-top: 8px; }
+.btn-warning:hover { background: #fce6c2; }
+
+/* All Attachments panel rows */
+.pattach-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-bottom: 0.5px solid var(--paper2); cursor: pointer; }
+.pattach-item:last-child { border-bottom: none; }
+.pattach-item:hover { background: var(--paper); }
+.pattach-thumb { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
+.pattach-placeholder { width: 38px; height: 38px; border-radius: 6px; background: var(--sapphire3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pattach-placeholder svg { width: 18px; height: 18px; color: var(--sapphire); }
+.pattach-info { flex: 1; min-width: 0; }
+.pattach-name { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pattach-meta { font-size: 10px; color: var(--ink4); margin-top: 2px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pattach-new { background: var(--gold); color: white; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
+.pattach-source { font-size: 10px; color: var(--ink4); padding: 1px 6px; border-radius: 99px; background: var(--paper2); }
+.pattach-act { display: flex; gap: 5px; flex-shrink: 0; }
+.pattach-btn { width: 28px; height: 28px; border-radius: 6px; border: 0.5px solid var(--paper3); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink3); }
+.pattach-btn:hover { border-color: var(--sapphire2); color: var(--sapphire); }
+.pattach-btn.share { border-color: var(--emerald2); color: var(--emerald); }
+.pattach-btn svg { width: 13px; height: 13px; }
+
+/* Closed Cases panel rows */
+.closed-case-row { background: white; border: 1px solid var(--paper3); border-radius: 10px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.closed-case-info { flex: 1; min-width: 0; }
+.closed-case-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+.closed-case-meta { font-size: 11px; color: var(--ink4); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+.closed-reopen-btn { background: var(--gold); color: white; border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font); flex-shrink: 0; }
+.closed-reopen-btn:hover { background: var(--gold2); }
+
+/* Cramped-header relief: hide sync label on narrow screens */
+@media (max-width: 520px) { .sync-label { display: none; } }
+
 .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .main-content { padding-bottom: 80px; }
@@ -420,6 +470,14 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
       <button class="hdr-icon-btn" id="hdr-tasks-btn" onclick="openPanel('tasks')" title="All Tasks">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
         <span class="hdr-badge" id="hdr-tasks-badge" style="display:none"></span>
+      </button>
+      <button class="hdr-icon-btn" id="hdr-attach-btn" onclick="openPanel('attachments')" title="All Attachments">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+        <span class="hdr-badge" id="hdr-attach-badge" style="display:none;background:var(--sapphire2)"></span>
+      </button>
+      <button class="hdr-icon-btn" id="hdr-closed-btn" onclick="openPanel('closed')" title="Closed Cases">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><path d="M9 14l2 2 4-4"/></svg>
+        <span class="hdr-badge" id="hdr-closed-badge" style="display:none;background:var(--ink4)"></span>
       </button>
       <div class="hdr-divider"></div>
       <button class="header-date-btn" onclick="openCalModal()">
@@ -470,6 +528,40 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
   </div>
 </div>
 
+<!-- All Attachments Panel -->
+<div class="panel-overlay" id="panel-attachments">
+  <div class="panel-topbar">
+    <button class="panel-back-btn" onclick="closePanel('attachments')" title="Back to Cause List">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="panel-topbar-title">All Attachments</div>
+    <span id="attach-panel-summary" style="font-size:11px;color:var(--ink4);font-weight:500"></span>
+  </div>
+  <div class="panel-filter-bar">
+    <button class="filter-pill active" onclick="setAttachFilter('all',this)">All</button>
+    <button class="filter-pill" onclick="setAttachFilter('today',this)">Today</button>
+    <button class="filter-pill" onclick="setAttachFilter('images',this)">Images</button>
+    <button class="filter-pill" onclick="setAttachFilter('docs',this)">Documents</button>
+  </div>
+  <div class="panel-scroll">
+    <div class="panel-section" id="attach-panel-content"></div>
+  </div>
+</div>
+
+<!-- Closed Cases Panel -->
+<div class="panel-overlay" id="panel-closed">
+  <div class="panel-topbar">
+    <button class="panel-back-btn" onclick="closePanel('closed')" title="Back to Cause List">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="panel-topbar-title">Closed Cases</div>
+    <span id="closed-panel-summary" style="font-size:11px;color:var(--ink4);font-weight:500"></span>
+  </div>
+  <div class="panel-scroll">
+    <div class="panel-section" id="closed-panel-content"></div>
+  </div>
+</div>
+
 <!-- Add/Edit Sheet -->
 <div class="overlay" id="add-overlay" onclick="handleOverlayClick(event,'add-overlay')">
   <div class="sheet">
@@ -488,6 +580,7 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
       </div>
       <div class="form-field"><label class="form-label">Proceedings / Stage</label><textarea class="form-textarea" id="f-proceedings" placeholder="e.g. Arguments on maintainability"></textarea></div>
       <button class="btn-primary" onclick="saveCase()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>Save Case</button>
+      <button class="btn-warning" id="close-btn" style="display:none" onclick="toggleCaseClosed()">Close This Case</button>
       <button class="btn-danger" id="delete-btn" style="display:none" onclick="deleteCase()">Delete This Case</button>
     </div>
   </div>
@@ -569,6 +662,8 @@ let pendingTaskCaseId = null, pendingTaskId = null;
 let firstSnapshotReceived = false;
 let searchQuery = '';
 let taskFilter = 'all';
+let attachFilter = 'all';
+let expandedCases = new Set();    // IDs of cases currently expanded
 // Image viewer state — supports both case attachments and task attachments
 let ivCaseId = null, ivIdx = null, ivIsTask = false, ivTaskId = null;
 
@@ -650,7 +745,7 @@ function caseMatches(c, q){
 }
 
 /* ── Render ── */
-function render(){ renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); updateTasksBadge(); }
+function render(){ renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); updateTasksBadge(); updateAttachBadge(); updateClosedBadge(); }
 
 function updateHeaderDate(){
   document.getElementById('header-date-label').textContent = selectedDate===todayStr() ? 'Today' : fmtShort(selectedDate);
@@ -659,8 +754,27 @@ function updateHeaderDate(){
 function updateTasksBadge(){
   const badge = document.getElementById('hdr-tasks-badge');
   if(!badge) return;
-  const pending = cases.reduce((s,c) => s + (c.tasks||[]).filter(t => !t.completed).length, 0);
+  const pending = cases.filter(c => !c.closed).reduce((s,c) => s + (c.tasks||[]).filter(t => !t.completed).length, 0);
   if(pending > 0){ badge.textContent = pending; badge.style.display = ''; }
+  else badge.style.display = 'none';
+}
+function updateAttachBadge(){
+  const badge = document.getElementById('hdr-attach-badge');
+  if(!badge) return;
+  const today = todayStr();
+  const newToday = cases.filter(c => !c.closed).reduce((s,c) => {
+    const caseNew = (c.attachments||[]).filter(a => a.addedDate===today).length;
+    const taskNew = (c.tasks||[]).reduce((s2,t) => s2 + (t.attachments||[]).filter(a => a.addedDate===today).length, 0);
+    return s + caseNew + taskNew;
+  }, 0);
+  if(newToday > 0){ badge.textContent = newToday; badge.style.display = ''; }
+  else badge.style.display = 'none';
+}
+function updateClosedBadge(){
+  const badge = document.getElementById('hdr-closed-badge');
+  if(!badge) return;
+  const closed = cases.filter(c => c.closed).length;
+  if(closed > 0){ badge.textContent = closed; badge.style.display = ''; }
   else badge.style.display = 'none';
 }
 
@@ -674,7 +788,7 @@ function renderCalStrip(){
     const d = new Date(today); d.setDate(today.getDate()+i);
     const ds = d.toISOString().split('T')[0];
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const hasCases = cases.some(c => c.date===ds || c.nextDate===ds);
+    const hasCases = cases.some(c => !c.closed && (c.date===ds || c.nextDate===ds));
     const isActive = ds===selectedDate && !searchQuery, isToday = ds===todayStr();
     const div = document.createElement('div');
     div.className = 'cal-day' + (isActive?' active':'') + (hasCases?' has-cases':'');
@@ -692,14 +806,14 @@ function renderCalStrip(){
 function renderStats(){
   const inSearch = !!searchQuery;
   if(inSearch){
-    const matched = cases.filter(c => caseMatches(c, searchQuery));
+    const matched = cases.filter(c => !c.closed && caseMatches(c, searchQuery));
     const pending = matched.reduce((s,c) => s + (c.tasks||[]).filter(t => !t.completed).length, 0);
     document.getElementById('stats-bar').innerHTML = `
       <div class="stat-pill"><div class="stat-dot" style="background:var(--ink2)"></div><span class="stat-num">${matched.length}</span> Match${matched.length===1?'':'es'}</div>
       <div class="stat-pill"><div class="stat-dot" style="background:var(--violet2)"></div><span class="stat-num">${pending}</span> Pending Task${pending===1?'':'s'}</div>`;
     return;
   }
-  const dc = cases.filter(c => c.date===selectedDate);
+  const dc = cases.filter(c => !c.closed && c.date===selectedDate);
   const total = dc.length, present = dc.filter(c=>c.judgeStatus==='Y').length;
   const absent = dc.filter(c=>c.judgeStatus==='N').length, withNext = dc.filter(c=>c.nextDate).length;
   const pendingTasks = dc.reduce((s,c) => s + (c.tasks||[]).filter(t => !t.completed).length, 0);
@@ -717,10 +831,10 @@ function renderCases(){
 
   let dc;
   if(inSearch){
-    dc = cases.filter(c => caseMatches(c, searchQuery))
+    dc = cases.filter(c => !c.closed && caseMatches(c, searchQuery))
       .sort((a,b) => (a.date||'').localeCompare(b.date||'') || (a.srNo||9999) - (b.srNo||9999));
   } else {
-    dc = cases.filter(c => c.date===selectedDate).sort((a,b) => (a.srNo||9999) - (b.srNo||9999));
+    dc = cases.filter(c => !c.closed && c.date===selectedDate).sort((a,b) => (a.srNo||9999) - (b.srNo||9999));
   }
 
   if(!dc.length){
@@ -734,9 +848,11 @@ function renderCases(){
     return;
   }
 
+  const anyExpanded = dc.some(c => expandedCases.has(c.id));
+  const expandBtn = `<button class="expand-all-btn" onclick="${anyExpanded?'collapseAllVisible':'expandAllVisible'}()">${anyExpanded?'Collapse all':'Expand all'}</button>`;
   let html = inSearch
-    ? `<div class="date-heading"><div class="date-heading-line"></div><div class="date-heading-text">Search results</div><span class="date-badge">${dc.length} match${dc.length>1?'es':''}</span><div class="date-heading-line"></div></div>`
-    : `<div class="date-heading"><div class="date-heading-line"></div><div class="date-heading-text">${fmtDMY(selectedDate)}</div><span class="date-badge">${dc.length} case${dc.length>1?'s':''}</span><div class="date-heading-line"></div></div>`;
+    ? `<div class="date-heading"><div class="date-heading-line"></div><div class="date-heading-text">Search results</div><span class="date-badge">${dc.length} match${dc.length>1?'es':''}</span>${expandBtn}<div class="date-heading-line"></div></div>`
+    : `<div class="date-heading"><div class="date-heading-line"></div><div class="date-heading-text">${fmtDMY(selectedDate)}</div><span class="date-badge">${dc.length} case${dc.length>1?'s':''}</span>${expandBtn}<div class="date-heading-line"></div></div>`;
 
   dc.forEach(c => {
     const judgeChip = c.judgeStatus==='Y' ? `<span class="status-chip present">Present</span>` : c.judgeStatus==='N' ? `<span class="status-chip absent">Absent</span>` : `<span class="status-chip unknown">Unknown</span>`;
@@ -785,16 +901,17 @@ function renderCases(){
       </div>`;
     }).join('');
 
-    html += `<div class="case-card ${c.nextDate?'next-set':''}" id="card-${c.id}">
+    const isExpanded = expandedCases.has(c.id);
+    html += `<div class="case-card ${c.nextDate?'next-set':''} ${isExpanded?'expanded':'collapsed'}" id="card-${c.id}">
 
       <div class="card-topbar">
         ${inSearch ? `<span class="search-result-date-pill"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${fmtDMY(c.date)}</span>`
                    : (hasNewToday ? `<span class="new-attach-indicator" style="margin-right:auto">📎 New today</span>` : `<div style="margin-right:auto"></div>`)}
         <div style="display:flex;gap:6px;align-items:center">
-          ${taskCount>0?`<button class="icon-btn" onclick="toggleTasks('${c.id}')" title="Tasks" style="background:var(--violet3);color:var(--violet2)">
+          <button class="icon-btn" onclick="toggleTasks('${c.id}')" title="Tasks" style="background:var(--violet3);color:var(--violet2)">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-            ${pendingTaskCount>0?`<span class="badge-count amber">${pendingTaskCount}</span>`:''}
-          </button>`:''}
+            ${pendingTaskCount>0?`<span class="badge-count amber">${pendingTaskCount}</span>`:taskCount>0?`<span class="badge-count violet">${taskCount}</span>`:''}
+          </button>
           <button class="icon-btn" onclick="toggleAttach('${c.id}')" title="Attachments">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
             ${attachCount>0?`<span class="badge-count">${attachCount}</span>`:''}
@@ -802,10 +919,13 @@ function renderCases(){
           <button class="icon-btn" onclick="editCase('${c.id}')" title="Edit">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
           </button>
+          <button class="icon-btn" onclick="toggleCaseExpand('${c.id}')" title="${isExpanded?'Collapse':'Expand'}" style="background:transparent">
+            <svg class="case-chevron ${isExpanded?'open':''}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
         </div>
       </div>
 
-      <div class="case-title-wrap"><div class="case-title">${escapeHtml(c.title)}</div></div>
+      <div class="case-title-wrap case-title-clickable" onclick="toggleCaseExpand('${c.id}')"><div class="case-title">${escapeHtml(c.title)}</div></div>
 
       <div class="case-body">
         <div class="judge-room-row">
@@ -963,6 +1083,17 @@ function advanceCase(id){
 
 /* ── Tasks ── */
 function toggleTasks(caseId){
+  // If the card is collapsed, expand it first so the tasks section is visible.
+  if(!expandedCases.has(caseId)){
+    expandedCases.add(caseId);
+    render();
+    setTimeout(() => {
+      const body = document.getElementById('tasks-body-'+caseId);
+      const chev = document.getElementById('tasks-chevron-'+caseId);
+      if(body && !body.classList.contains('open')){ body.classList.add('open'); if(chev) chev.classList.add('open'); }
+    }, 30);
+    return;
+  }
   const body = document.getElementById('tasks-body-'+caseId);
   const chev = document.getElementById('tasks-chevron-'+caseId);
   if(body){ body.classList.toggle('open'); if(chev) chev.classList.toggle('open'); }
@@ -1050,6 +1181,16 @@ function deleteComment(caseId,idx){
 
 /* ── Case attachments ── */
 function openAttachSection(caseId){
+  if(!expandedCases.has(caseId)){
+    expandedCases.add(caseId);
+    render();
+    setTimeout(() => {
+      const body = document.getElementById('attach-body-'+caseId);
+      const chev = document.getElementById('attach-chevron-'+caseId);
+      if(body && !body.classList.contains('open')){ body.classList.add('open'); if(chev) chev.classList.add('open'); }
+    }, 30);
+    return;
+  }
   const body = document.getElementById('attach-body-'+caseId);
   const chev = document.getElementById('attach-chevron-'+caseId);
   if(body){ body.classList.toggle('open'); if(chev) chev.classList.toggle('open'); }
@@ -1186,12 +1327,13 @@ function openAddSheet(){
   document.getElementById('f-room').value = '';
   document.getElementById('f-proceedings').value = '';
   document.getElementById('delete-btn').style.display = 'none';
+  document.getElementById('close-btn').style.display = 'none';
   document.getElementById('add-overlay').classList.add('open');
 }
 function editCase(id){
   const c = cases.find(x => x.id===id); if(!c) return;
   editingId = id;
-  document.getElementById('sheet-title').textContent = 'Edit Case';
+  document.getElementById('sheet-title').textContent = c.closed ? 'Edit Closed Case' : 'Edit Case';
   document.getElementById('edit-id').value = id;
   document.getElementById('f-date').value = c.date;
   document.getElementById('f-title').value = c.title;
@@ -1199,6 +1341,9 @@ function editCase(id){
   document.getElementById('f-room').value = c.room||'';
   document.getElementById('f-proceedings').value = c.proceedings||'';
   document.getElementById('delete-btn').style.display = '';
+  const closeBtn = document.getElementById('close-btn');
+  closeBtn.textContent = c.closed ? 'Reopen This Case' : 'Close This Case';
+  closeBtn.style.display = '';
   document.getElementById('add-overlay').classList.add('open');
 }
 function saveCase(){
@@ -1249,7 +1394,7 @@ function renderCalGrid(){
   let html = days.map(d => `<div class="cal-grid-header">${d}</div>`).join('');
   const first = new Date(calViewDate.getFullYear(),calViewDate.getMonth(),1);
   const last = new Date(calViewDate.getFullYear(),calViewDate.getMonth()+1,0);
-  const allDates = [...new Set(cases.flatMap(c => [c.date,c.nextDate].filter(Boolean)))];
+  const allDates = [...new Set(cases.filter(c => !c.closed).flatMap(c => [c.date,c.nextDate].filter(Boolean)))];
   const today = todayStr();
   for(let i=0; i<first.getDay(); i++){
     const d = new Date(first); d.setDate(d.getDate()-(first.getDay()-i));
@@ -1274,15 +1419,21 @@ function pickCalDate(ds){
   render();
 }
 
-/* ── All Tasks Panel ── */
+/* ── Panels (All Tasks / All Attachments / Closed Cases) ── */
 function openPanel(name){
   document.getElementById('panel-'+name).classList.add('open');
-  document.getElementById('hdr-tasks-btn').classList.toggle('active', name==='tasks');
-  if(name==='tasks') renderTasksPanel();
+  document.getElementById('hdr-tasks-btn').classList.toggle('active',  name==='tasks');
+  document.getElementById('hdr-attach-btn').classList.toggle('active', name==='attachments');
+  document.getElementById('hdr-closed-btn').classList.toggle('active', name==='closed');
+  if(name==='tasks')       renderTasksPanel();
+  if(name==='attachments') renderAttachPanel();
+  if(name==='closed')      renderClosedPanel();
 }
 function closePanel(name){
   document.getElementById('panel-'+name).classList.remove('open');
   document.getElementById('hdr-tasks-btn').classList.remove('active');
+  document.getElementById('hdr-attach-btn').classList.remove('active');
+  document.getElementById('hdr-closed-btn').classList.remove('active');
 }
 function setTaskFilter(f, btn){
   taskFilter = f;
@@ -1411,6 +1562,168 @@ async function doShare(a){
   } catch(err){
     if(err.name !== 'AbortError') showToast('Share failed: '+err.message,'error');
   }
+}
+
+/* ── Case expand / collapse ── */
+function toggleCaseExpand(id){
+  if(expandedCases.has(id)) expandedCases.delete(id);
+  else expandedCases.add(id);
+  render();
+}
+function visibleCaseIds(){
+  if(searchQuery) return cases.filter(c => !c.closed && caseMatches(c, searchQuery)).map(c => c.id);
+  return cases.filter(c => !c.closed && c.date===selectedDate).map(c => c.id);
+}
+function expandAllVisible(){
+  visibleCaseIds().forEach(id => expandedCases.add(id));
+  render();
+}
+function collapseAllVisible(){
+  visibleCaseIds().forEach(id => expandedCases.delete(id));
+  render();
+}
+
+/* ── Close / Reopen case ── */
+function toggleCaseClosed(){
+  if(!editingId) return;
+  const c = cases.find(x => x.id===editingId); if(!c) return;
+  const willClose = !c.closed;
+  if(!confirm(willClose ? 'Close this case? It will move to Closed Cases.' : 'Reopen this case?')) return;
+  c.closed = willClose;
+  c.closedDate = willClose ? todayStr() : null;
+  saveToFirebase(c)
+    .then(() => { closeSheet('add-overlay'); showToast(willClose?'Case closed':'Case reopened','success'); })
+    .catch(e => showToast('Error: '+e.message,'error'));
+}
+function reopenCaseFromPanel(id){
+  const c = cases.find(x => x.id===id); if(!c) return;
+  if(!confirm('Reopen this case?')) return;
+  c.closed = false; c.closedDate = null;
+  saveToFirebase(c)
+    .then(() => { renderClosedPanel(); showToast('Case reopened','success'); })
+    .catch(e => showToast('Error: '+e.message,'error'));
+}
+
+/* ── All Attachments Panel ── */
+function setAttachFilter(f, btn){
+  attachFilter = f;
+  document.querySelectorAll('#panel-attachments .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAttachPanel();
+}
+function getAttachByRef(caseId, taskId, idx){
+  if(taskId) return getTaskAttach(caseId, taskId, idx);
+  return getCaseAttach(caseId, idx);
+}
+function downloadByRef(caseId, taskId, idx){
+  const a = getAttachByRef(caseId, taskId, idx);
+  if(!a || !a.dataUrl){ showToast('No file data','warning'); return; }
+  doDownload(a.dataUrl, a.name, a.type);
+  showToast('Saving: '+a.name,'success');
+}
+async function shareByRef(caseId, taskId, idx){
+  const a = getAttachByRef(caseId, taskId, idx);
+  if(!a){ showToast('Attachment not found','warning'); return; }
+  if(!a.dataUrl){ showToast('No file data','warning'); return; }
+  await doShare(a);
+}
+function openByRef(caseId, taskId, idx){
+  if(taskId) openTaskAttachViewer(caseId, taskId, idx);
+  else       openViewer(caseId, idx);
+}
+
+function renderAttachPanel(){
+  const container = document.getElementById('attach-panel-content');
+  const summary = document.getElementById('attach-panel-summary');
+  const today = todayStr();
+  const all = [];
+  cases.forEach(c => {
+    if(c.closed) return;
+    (c.attachments||[]).forEach((a,idx) => all.push({ caseId: c.id, caseTitle: c.title, caseDate: c.date, a, idx, source: 'Case file', taskId: null }));
+    (c.tasks||[]).forEach(t => {
+      const tag = 'Task: '+((t.nature||'').substring(0,30))+((t.nature||'').length>30?'…':'');
+      (t.attachments||[]).forEach((a,idx) => all.push({ caseId: c.id, caseTitle: c.title, caseDate: c.date, a, idx, source: tag, taskId: t.id }));
+    });
+  });
+  summary.textContent = `${all.length} total attachment${all.length===1?'':'s'}`;
+  updateAttachBadge();
+
+  let filtered = all;
+  if(attachFilter==='today')  filtered = all.filter(x => x.a.addedDate===today);
+  if(attachFilter==='images') filtered = all.filter(x => x.a.type && x.a.type.startsWith('image/'));
+  if(attachFilter==='docs')   filtered = all.filter(x => !x.a.type || !x.a.type.startsWith('image/'));
+
+  if(!filtered.length){
+    container.innerHTML = `<div class="panel-empty"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg><p>No attachments found</p></div>`;
+    return;
+  }
+
+  // Group by caseId, preserve insertion order
+  const byCase = {};
+  filtered.forEach(x => {
+    if(!byCase[x.caseId]) byCase[x.caseId] = { caseTitle: x.caseTitle, caseDate: x.caseDate, items: [] };
+    byCase[x.caseId].items.push(x);
+  });
+
+  let html = '';
+  Object.values(byCase).forEach(group => {
+    html += `<div class="panel-case-block">
+      <div class="panel-case-title">${escapeHtml(group.caseTitle)}<div class="panel-case-date">${fmtDMY(group.caseDate)}</div></div>
+      <div class="panel-items-wrap">
+        ${group.items.map(x => {
+          const a = x.a;
+          const isImg = a.dataUrl && a.type && a.type.startsWith('image/');
+          const hasData = !!a.dataUrl;
+          const tk = x.taskId ? `'${x.taskId}'` : 'null';
+          const openExpr = `openByRef('${x.caseId}',${tk},${x.idx})`;
+          return `<div class="pattach-item">
+            ${isImg
+              ? `<img src="${a.dataUrl}" class="pattach-thumb" onclick="${openExpr}" alt="${escapeHtml(a.name)}">`
+              : `<div class="pattach-placeholder" onclick="${hasData?openExpr:''}" style="${hasData?'cursor:pointer':''}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>`}
+            <div class="pattach-info">
+              <div class="pattach-name">${escapeHtml(a.name)}</div>
+              <div class="pattach-meta">
+                <span>${a.addedDate?fmtDMY(a.addedDate):''}</span>
+                ${a.addedDate===today?`<span class="pattach-new">Today</span>`:''}
+                <span class="pattach-source">${escapeHtml(x.source)}</span>
+                ${a.addedBy?`<span>${escapeHtml(a.addedBy)}</span>`:''}
+              </div>
+            </div>
+            <div class="pattach-act">
+              <button class="pattach-btn" onclick="${openExpr}" title="Open"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              ${hasData?`<button class="pattach-btn" onclick="downloadByRef('${x.caseId}',${tk},${x.idx})" title="Save"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>`:''}
+              ${hasData?`<button class="pattach-btn share" onclick="shareByRef('${x.caseId}',${tk},${x.idx})" title="Share"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>`:''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+/* ── Closed Cases Panel ── */
+function renderClosedPanel(){
+  const container = document.getElementById('closed-panel-content');
+  const summary = document.getElementById('closed-panel-summary');
+  const closed = cases.filter(c => c.closed).sort((a,b) => (b.closedDate||'').localeCompare(a.closedDate||''));
+  summary.textContent = `${closed.length} closed case${closed.length===1?'':'s'}`;
+  updateClosedBadge();
+  if(!closed.length){
+    container.innerHTML = `<div class="panel-empty"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 14l2 2 4-4"/></svg><p>No closed cases yet</p></div>`;
+    return;
+  }
+  container.innerHTML = closed.map(c => `<div class="closed-case-row">
+    <div class="closed-case-info">
+      <div class="closed-case-title">${escapeHtml(c.title)}</div>
+      <div class="closed-case-meta">
+        <span>Judge: ${escapeHtml(c.judge||'—')}</span>
+        <span>Hearing: ${c.date?fmtDMY(c.date):'—'}</span>
+        <span>Closed: ${c.closedDate?fmtDMY(c.closedDate):'—'}</span>
+      </div>
+    </div>
+    <button class="closed-reopen-btn" onclick="reopenCaseFromPanel('${c.id}')">Reopen</button>
+  </div>`).join('');
 }
 
 /* ── Bootstrap ── */
