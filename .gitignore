@@ -1,0 +1,6 @@
+.DS_Store
+
+# Local-only logo source files (oversized 2000×2000 PNGs).
+# Web-optimised versions logo.png / favicon.png / apple-touch-icon.png are tracked.
+WakalaLogo.png
+WakalaFavicon.png
