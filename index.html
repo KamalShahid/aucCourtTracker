@@ -108,8 +108,14 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .no-cases p { font-size: 14px; }
 
 /* Case Card */
-.case-card { background: white; border-radius: var(--radius); border: 1px solid var(--paper3); margin-bottom: 12px; overflow: hidden; transition: border-color 0.3s; box-shadow: var(--shadow); animation: slideIn 0.25s ease; }
-.case-card.next-set { border-color: var(--gold); border-width: 1.5px; }
+.case-card { background: white; border-radius: var(--radius); border: 1px solid var(--paper3); border-left: 4px solid var(--sapphire2); margin-bottom: 12px; overflow: hidden; transition: border-color 0.3s; box-shadow: var(--shadow); animation: slideIn 0.25s ease; }
+.case-card.next-set { border-color: var(--gold); border-width: 1px; border-left-width: 4px; }
+
+/* Status colours along the left edge — priority: red > yellow > green > blue */
+.case-card.status-blue   { border-left-color: var(--sapphire2); }
+.case-card.status-green  { border-left-color: var(--emerald2); }
+.case-card.status-yellow { border-left-color: var(--amber2); }
+.case-card.status-red    { border-left-color: var(--crimson2); }
 @keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Card top bar */
@@ -365,6 +371,25 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .cal-cell.has-cases::after { content:''; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
 .cal-cell.selected::after { background: var(--gold2); }
 
+/* Live notification popups (top-right) */
+#notif-container { position: fixed; top: 12px; right: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; max-width: 360px; width: calc(100vw - 24px); pointer-events: none; }
+.notif-toast { pointer-events: all; background: white; border: 1px solid var(--paper3); border-radius: 12px; padding: 10px 12px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: notif-in 0.3s cubic-bezier(0.34,1.1,0.64,1); }
+.notif-toast.out { animation: notif-out 0.25s ease forwards; }
+@keyframes notif-in  { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes notif-out { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
+.notif-type { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
+.notif-type.comment { background: var(--sapphire3); color: var(--sapphire); }
+.notif-type.task    { background: var(--violet3); color: var(--violet); }
+.notif-type.attach  { background: var(--paper2); color: var(--ink3); }
+.notif-type.case    { background: var(--gold); color: white; }
+.notif-body { flex: 1; font-size: 13px; color: var(--ink); line-height: 1.4; min-width: 0; }
+.notif-body strong { color: var(--ink); }
+.notif-action { padding: 5px 10px; border-radius: 6px; background: var(--ink); color: var(--gold2); border: none; cursor: pointer; font-size: 11px; font-weight: 700; font-family: var(--font); flex-shrink: 0; }
+.notif-action:hover { background: #1a1d29; }
+.notif-close { background: none; border: none; color: var(--ink4); cursor: pointer; padding: 4px; flex-shrink: 0; display: flex; }
+.notif-close:hover { color: var(--ink); }
+.notif-close svg { width: 14px; height: 14px; }
+
 /* Toast */
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: white; padding: 10px 20px; border-radius: 99px; font-size: 13px; font-weight: 600; z-index: 999; transition: transform 0.3s cubic-bezier(0.34,1.1,0.64,1); white-space: nowrap; box-shadow: var(--shadow-lg); font-family: var(--font); }
 .toast.show { transform: translateX(-50%) translateY(0); }
@@ -386,6 +411,10 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .panel-section { padding: 12px 14px 30px; }
 .panel-case-block { margin-bottom: 16px; }
 .panel-case-title { font-size: 14px; font-weight: 700; color: var(--ink); padding: 8px 12px; background: var(--paper2); border-radius: 8px 8px 0 0; border: 1px solid var(--paper3); border-bottom: none; line-height: 1.3; }
+.panel-case-title.linked { cursor: pointer; transition: background 0.15s, color 0.15s; }
+.panel-case-title.linked:hover { background: var(--ink); color: var(--gold2); }
+.panel-case-title.linked .panel-case-date { transition: color 0.15s; }
+.panel-case-title.linked:hover .panel-case-date { color: var(--gold); }
 .panel-case-date { font-size: 10px; color: var(--ink4); font-weight: 500; margin-top: 2px; font-family: var(--font-mono); }
 .panel-items-wrap { border: 1px solid var(--paper3); border-radius: 0 0 8px 8px; overflow: hidden; background: white; }
 .ptask-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 0.5px solid var(--paper2); }
@@ -518,6 +547,10 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
         <span class="hdr-badge" id="hdr-attach-badge" style="display:none;background:var(--sapphire2)"></span>
       </button>
+      <button class="hdr-icon-btn" id="hdr-comments-btn" onclick="openPanel('comments')" title="All Comments">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        <span class="hdr-badge" id="hdr-comments-badge" style="display:none;background:var(--sapphire)"></span>
+      </button>
       <button class="hdr-icon-btn" id="hdr-closed-btn" onclick="openPanel('closed')" title="Closed Cases">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><path d="M9 14l2 2 4-4"/></svg>
         <span class="hdr-badge" id="hdr-closed-badge" style="display:none;background:var(--ink4)"></span>
@@ -591,6 +624,20 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
   </div>
 </div>
 
+<!-- All Comments Panel -->
+<div class="panel-overlay" id="panel-comments">
+  <div class="panel-topbar">
+    <button class="panel-back-btn" onclick="closePanel('comments')" title="Back to Cause List">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="panel-topbar-title">All Comments</div>
+    <span id="comments-panel-summary" style="font-size:11px;color:var(--ink4);font-weight:500"></span>
+  </div>
+  <div class="panel-scroll">
+    <div class="panel-section" id="comments-panel-content"></div>
+  </div>
+</div>
+
 <!-- Closed Cases Panel -->
 <div class="panel-overlay" id="panel-closed">
   <div class="panel-topbar">
@@ -604,6 +651,9 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
     <div class="panel-section" id="closed-panel-content"></div>
   </div>
 </div>
+
+<!-- Notification container (top-right popups) -->
+<div id="notif-container"></div>
 
 <!-- Add/Edit Sheet -->
 <div class="overlay" id="add-overlay" onclick="handleOverlayClick(event,'add-overlay')">
@@ -706,7 +756,16 @@ let firstSnapshotReceived = false;
 let searchQuery = '';
 let taskFilter = 'all';
 let attachFilter = 'all';
-let expandedCases = new Set();    // IDs of cases currently expanded
+let expandedCases = new Set();
+
+// Real-time notification plumbing.
+// prevCases captures the last-seen state so the next snapshot can be diffed.
+// ownRecentWrites records IDs of items this user just wrote so they don't get
+// notified about their own actions (the snapshot listener fires for them too).
+let prevCases = null;
+const ownRecentWrites = new Set();
+const OWN_WRITE_TTL_MS = 30_000;
+function markOwnWrite(key){ ownRecentWrites.add(key); setTimeout(() => ownRecentWrites.delete(key), OWN_WRITE_TTL_MS); }    // IDs of cases currently expanded
 // Image viewer state — supports both case attachments and task attachments
 let ivCaseId = null, ivIdx = null, ivIsTask = false, ivTaskId = null;
 
@@ -718,6 +777,41 @@ function nowLabel(){ return new Date().toLocaleString('en-PK',{day:'2-digit',mon
 function getCommenterName(){ return localStorage.getItem(COMMENTER_KEY)||''; }
 function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2,8)); }
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Status colour for the case card's left edge.
+// Priority: nextDate set (red) → has comments/tasks (yellow) → Sr#/Judge updated (green) → default (blue).
+function caseStatus(c){
+  if (c.nextDate) return 'red';
+  if ((c.comments||[]).length > 0 || (c.tasks||[]).length > 0) return 'yellow';
+  if (c.srNo || c.judgeStatus) return 'green';
+  return 'blue';
+}
+
+// Navigate from a panel row straight to the case in the cause list.
+function jumpToCase(caseId){
+  const c = cases.find(x => x.id===caseId); if(!c) return;
+  // Close any open panel
+  ['tasks','attachments','closed','comments'].forEach(n => {
+    const p = document.getElementById('panel-'+n);
+    if(p) p.classList.remove('open');
+  });
+  document.querySelectorAll('.hdr-icon-btn').forEach(b => b.classList.remove('active'));
+  // If the case is closed, send the user to the Closed Cases panel instead.
+  if (c.closed){ openPanel('closed'); return; }
+  // Clear search and jump to the case's date with the card expanded.
+  if (searchQuery){
+    document.getElementById('search-input').value = '';
+    document.getElementById('search-clear').classList.remove('show');
+    searchQuery = '';
+  }
+  selectedDate = c.date;
+  expandedCases.add(caseId);
+  render();
+  setTimeout(() => {
+    const el = document.getElementById('card-'+caseId);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 100);
+}
 
 /* ── Firebase init + listen ── */
 function initFirebase(){
@@ -733,7 +827,17 @@ function initFirebase(){
   setSyncStatus('connecting');
   casesCol.onSnapshot(
     snap => {
-      cases = snap.docs.map(d => d.data());
+      const newCases = snap.docs.map(d => d.data());
+      // After the first snapshot, surface anything new since the last update.
+      if (firstSnapshotReceived) diffAndNotify(prevCases || [], newCases);
+      prevCases = newCases.map(c => ({
+        id: c.id, title: c.title,
+        commentIds:    (c.comments||[]).map(x => x.id),
+        taskIds:       (c.tasks||[]).map(x => x.id),
+        attachmentIds: (c.attachments||[]).map(x => x.id),
+        taskAttachmentIds: (c.tasks||[]).flatMap(t => (t.attachments||[]).map(a => t.id+':'+a.id))
+      }));
+      cases = newCases;
       firstSnapshotReceived = true;
       setSyncStatus(navigator.onLine ? 'live' : 'offline');
       render();
@@ -746,6 +850,62 @@ function initFirebase(){
   );
   window.addEventListener('online',  () => firstSnapshotReceived && setSyncStatus('live'));
   window.addEventListener('offline', () => setSyncStatus('offline'));
+}
+
+// Compare last-known case state vs. fresh snapshot; raise a popup for
+// each newly-added comment / task / attachment / case that this user
+// didn't author (filtered via ownRecentWrites).
+function diffAndNotify(prev, next){
+  const prevMap = new Map(prev.map(p => [p.id, p]));
+  next.forEach(c => {
+    const p = prevMap.get(c.id);
+    if (!p){
+      // Brand new case
+      if (!ownRecentWrites.has('case:'+c.id)) showNotification('case', `New case <strong>${escapeHtml(c.title)}</strong> added`, c.id);
+      return;
+    }
+    (c.comments||[]).forEach(cm => {
+      if (!p.commentIds.includes(cm.id) && !ownRecentWrites.has('comment:'+cm.id)){
+        showNotification('comment', `New comment on <strong>${escapeHtml(c.title)}</strong> by ${escapeHtml(cm.author||'Team')}`, c.id);
+      }
+    });
+    (c.tasks||[]).forEach(t => {
+      if (!p.taskIds.includes(t.id) && !ownRecentWrites.has('task:'+t.id)){
+        showNotification('task', `New task on <strong>${escapeHtml(c.title)}</strong>: ${escapeHtml((t.nature||'').slice(0,60))}${(t.nature||'').length>60?'…':''}`, c.id);
+      }
+    });
+    (c.attachments||[]).forEach(a => {
+      if (!p.attachmentIds.includes(a.id) && !ownRecentWrites.has('attach:'+a.id)){
+        showNotification('attach', `New attachment <strong>${escapeHtml(a.name)}</strong> on ${escapeHtml(c.title)}`, c.id);
+      }
+    });
+    (c.tasks||[]).forEach(t => {
+      (t.attachments||[]).forEach(a => {
+        const key = t.id+':'+a.id;
+        if (!p.taskAttachmentIds.includes(key) && !ownRecentWrites.has('attach:'+a.id)){
+          showNotification('attach', `New file <strong>${escapeHtml(a.name)}</strong> on task in ${escapeHtml(c.title)}`, c.id);
+        }
+      });
+    });
+  });
+}
+
+function showNotification(type, htmlBody, caseId){
+  const container = document.getElementById('notif-container');
+  if(!container) return;
+  const n = document.createElement('div');
+  n.className = 'notif-toast';
+  n.innerHTML = `<span class="notif-type ${type}">${type}</span>
+    <div class="notif-body">${htmlBody}</div>
+    ${caseId ? `<button class="notif-action" data-case="${caseId}">View</button>` : ''}
+    <button class="notif-close" aria-label="Dismiss"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+  // Wire buttons after insertion so event-listeners cleanly bind.
+  container.appendChild(n);
+  const dismiss = () => { n.classList.add('out'); setTimeout(() => n.remove(), 250); };
+  const viewBtn = n.querySelector('.notif-action');
+  if (viewBtn) viewBtn.addEventListener('click', () => { jumpToCase(viewBtn.dataset.case); dismiss(); });
+  n.querySelector('.notif-close').addEventListener('click', dismiss);
+  setTimeout(dismiss, 6000);
 }
 
 function setSyncStatus(state){
@@ -788,7 +948,7 @@ function caseMatches(c, q){
 }
 
 /* ── Render ── */
-function render(){ renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); updateTasksBadge(); updateAttachBadge(); updateClosedBadge(); }
+function render(){ renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); updateTasksBadge(); updateAttachBadge(); updateCommentsBadge(); updateClosedBadge(); }
 
 function updateHeaderDate(){
   document.getElementById('header-date-label').textContent = selectedDate===todayStr() ? 'Today' : fmtShort(selectedDate);
@@ -949,7 +1109,7 @@ function renderCases(){
     }).join('');
 
     const isExpanded = expandedCases.has(c.id);
-    html += `<div class="case-card ${c.nextDate?'next-set':''} ${isExpanded?'expanded':'collapsed'}" id="card-${c.id}">
+    html += `<div class="case-card ${c.nextDate?'next-set':''} ${isExpanded?'expanded':'collapsed'} status-${caseStatus(c)}" id="card-${c.id}">
 
       <div class="card-topbar">
         ${inSearch ? `<span class="search-result-date-pill"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${fmtDMY(c.date)}</span>`
@@ -1156,7 +1316,9 @@ function saveTask(caseId){
   const to = document.getElementById('tf-to-'+caseId).value.trim();
   if(!nature||!by||!to){ showToast('Nature, Assigned By and Assigned To are required','warning'); return; }
   if(!c.tasks) c.tasks = [];
-  c.tasks.push({ id: uid(), nature, assignedBy: by, assignedTo: to, assignedDate: todayStr(), completed: false, completedDate: null, attachments: [] });
+  const newTask = { id: uid(), nature, assignedBy: by, assignedTo: to, assignedDate: todayStr(), completed: false, completedDate: null, attachments: [] };
+  c.tasks.push(newTask);
+  markOwnWrite('task:'+newTask.id);
   saveToFirebase(c)
     .then(() => { showToast('Task saved','success'); setTimeout(() => { const body = document.getElementById('tasks-body-'+caseId); if(body && !body.classList.contains('open')) body.classList.add('open'); }, 80); })
     .catch(e => showToast('Error: '+e.message,'error'));
@@ -1217,7 +1379,9 @@ function addComment(caseId){
   const author = nameInp ? nameInp.value.trim() : 'Team';
   if(!text){ showToast('Type a comment first','warning'); return; }
   if(!c.comments) c.comments = [];
-  c.comments.push({ text, author: author||'Team', time: nowLabel(), id: uid() });
+  const newComment = { text, author: author||'Team', time: nowLabel(), id: uid() };
+  c.comments.push(newComment);
+  markOwnWrite('comment:'+newComment.id);
   saveToFirebase(c).then(() => showToast('Comment added','success')).catch(e => showToast('Error: '+e.message,'error'));
 }
 function deleteComment(caseId,idx){
@@ -1323,14 +1487,16 @@ function confirmAttach(){
     const c = cases.find(x => x.id===pendingTaskCaseId); if(!c){ cancelAttach(); return; }
     const t = (c.tasks||[]).find(x => x.id===pendingTaskId); if(!t){ cancelAttach(); return; }
     if(!t.attachments) t.attachments = [];
-    t.attachments.push({
+    const newAttach = {
       name,
       type: pendingAttachFile ? pendingAttachFile.type : '',
       dataUrl: pendingAttachDataUrl || null,
       addedDate: todayStr(),
       addedBy: getCommenterName()||'Team',
       id: uid()
-    });
+    };
+    t.attachments.push(newAttach);
+    markOwnWrite('attach:'+newAttach.id);
     document.getElementById('name-dialog').style.display = 'none';
     const caseIdLocal = pendingTaskCaseId;
     pendingTaskCaseId = null; pendingTaskId = null; pendingAttachFile = null; pendingAttachDataUrl = null;
@@ -1343,14 +1509,16 @@ function confirmAttach(){
   if(!pendingAttachCaseId){ cancelAttach(); return; }
   const c = cases.find(x => x.id===pendingAttachCaseId); if(!c){ cancelAttach(); return; }
   if(!c.attachments) c.attachments = [];
-  c.attachments.push({
+  const newCaseAttach = {
     name,
     type: pendingAttachFile ? pendingAttachFile.type : '',
     dataUrl: pendingAttachDataUrl || null,
     addedDate: todayStr(),
     addedBy: getCommenterName()||'Team',
     id: uid()
-  });
+  };
+  c.attachments.push(newCaseAttach);
+  markOwnWrite('attach:'+newCaseAttach.id);
   document.getElementById('name-dialog').style.display = 'none';
   pendingAttachCaseId = null; pendingAttachFile = null; pendingAttachDataUrl = null;
   saveToFirebase(c).then(() => showToast('Attachment saved','success')).catch(e => showToast('Error: '+e.message,'error'));
@@ -1415,6 +1583,7 @@ function saveCase(){
       comments: [], attachments: [], tasks: [],
       created: new Date().toISOString()
     };
+    markOwnWrite('case:'+rec.id);
   }
   if(!rec) return;
   saveToFirebase(rec)
@@ -1469,18 +1638,18 @@ function pickCalDate(ds){
 /* ── Panels (All Tasks / All Attachments / Closed Cases) ── */
 function openPanel(name){
   document.getElementById('panel-'+name).classList.add('open');
-  document.getElementById('hdr-tasks-btn').classList.toggle('active',  name==='tasks');
-  document.getElementById('hdr-attach-btn').classList.toggle('active', name==='attachments');
-  document.getElementById('hdr-closed-btn').classList.toggle('active', name==='closed');
+  document.getElementById('hdr-tasks-btn').classList.toggle('active',    name==='tasks');
+  document.getElementById('hdr-attach-btn').classList.toggle('active',   name==='attachments');
+  document.getElementById('hdr-comments-btn').classList.toggle('active', name==='comments');
+  document.getElementById('hdr-closed-btn').classList.toggle('active',   name==='closed');
   if(name==='tasks')       renderTasksPanel();
   if(name==='attachments') renderAttachPanel();
+  if(name==='comments')    renderCommentsPanel();
   if(name==='closed')      renderClosedPanel();
 }
 function closePanel(name){
   document.getElementById('panel-'+name).classList.remove('open');
-  document.getElementById('hdr-tasks-btn').classList.remove('active');
-  document.getElementById('hdr-attach-btn').classList.remove('active');
-  document.getElementById('hdr-closed-btn').classList.remove('active');
+  document.querySelectorAll('.hdr-icon-btn').forEach(b => b.classList.remove('active'));
 }
 function setTaskFilter(f, btn){
   taskFilter = f;
@@ -1509,7 +1678,7 @@ function renderTasksPanel(){
   let html = '';
   Object.values(byCase).forEach(group => {
     html += `<div class="panel-case-block">
-      <div class="panel-case-title">${escapeHtml(group.caseTitle)}<div class="panel-case-date">${fmtDMY(group.caseDate)}</div></div>
+      <div class="panel-case-title linked" onclick="jumpToCase('${group.caseId}')" title="Open this case">${escapeHtml(group.caseTitle)}<div class="panel-case-date">${fmtDMY(group.caseDate)}</div></div>
       <div class="panel-items-wrap">
         ${group.tasks.map(t => `
           <div class="ptask-item ${t.completed?'completed':''}" id="ptask-${group.caseId}-${t.id}">
@@ -1717,7 +1886,7 @@ function renderAttachPanel(){
   let html = '';
   Object.values(byCase).forEach(group => {
     html += `<div class="panel-case-block">
-      <div class="panel-case-title">${escapeHtml(group.caseTitle)}<div class="panel-case-date">${fmtDMY(group.caseDate)}</div></div>
+      <div class="panel-case-title linked" onclick="jumpToCase('${group.caseId}')" title="Open this case">${escapeHtml(group.caseTitle)}<div class="panel-case-date">${fmtDMY(group.caseDate)}</div></div>
       <div class="panel-items-wrap">
         ${group.items.map(x => {
           const a = x.a;
@@ -1772,6 +1941,52 @@ function renderClosedPanel(){
       </div>
     </div>
     <button class="closed-reopen-btn" onclick="reopenCaseFromPanel('${c.id}')">Reopen</button>
+  </div>`).join('');
+}
+
+/* ── All Comments Panel ── */
+function updateCommentsBadge(){
+  const badge = document.getElementById('hdr-comments-badge');
+  if(!badge) return;
+  const total = cases.filter(c => !c.closed).reduce((s,c) => s + (c.comments||[]).length, 0);
+  if(total > 0){ badge.textContent = total > 99 ? '99+' : total; badge.style.display = ''; }
+  else badge.style.display = 'none';
+}
+
+function renderCommentsPanel(){
+  const container = document.getElementById('comments-panel-content');
+  const summary = document.getElementById('comments-panel-summary');
+  // Collect comments from every non-closed case, newest-first.
+  const all = [];
+  cases.forEach(c => {
+    if(c.closed) return;
+    (c.comments||[]).forEach(cm => all.push({ caseId: c.id, caseTitle: c.title, caseDate: c.date, cm }));
+  });
+  summary.textContent = `${all.length} comment${all.length===1?'':'s'}`;
+  updateCommentsBadge();
+  if(!all.length){
+    container.innerHTML = `<div class="panel-empty"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg><p>No comments yet</p></div>`;
+    return;
+  }
+  // Group by case so the linked title appears once per case block.
+  const byCase = {};
+  all.forEach(x => {
+    if(!byCase[x.caseId]) byCase[x.caseId] = { caseId: x.caseId, caseTitle: x.caseTitle, caseDate: x.caseDate, items: [] };
+    byCase[x.caseId].items.push(x.cm);
+  });
+  container.innerHTML = Object.values(byCase).map(g => `<div class="panel-case-block">
+    <div class="panel-case-title linked" onclick="jumpToCase('${g.caseId}')" title="Open this case">${escapeHtml(g.caseTitle)}<div class="panel-case-date">${fmtDMY(g.caseDate)}</div></div>
+    <div class="panel-items-wrap">
+      ${g.items.map(cm => `<div class="ptask-item">
+        <div class="ptask-info">
+          <div class="ptask-nature">${escapeHtml(cm.text||'')}</div>
+          <div class="ptask-dates">
+            <span style="color:var(--sapphire);font-weight:700">${escapeHtml(cm.author||'Team')}</span>
+            <span>${escapeHtml(cm.time||'')}</span>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
   </div>`).join('');
 }
 
