@@ -440,6 +440,10 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 /* Per-case Tasks icon styling (light theme default) */
 .icon-btn.tasks-btn { background: var(--violet3); color: var(--violet2); }
 .icon-btn.tasks-btn:hover { background: #ede9fe; }
+.icon-btn.comments-btn { background: var(--sapphire3); color: var(--sapphire); }
+.icon-btn.comments-btn:hover { background: #dceaf8; }
+.case-card.collapsed .icon-btn.comments-btn { background: rgba(37,99,168,0.25); color: #93c5fd; }
+.case-card.collapsed .icon-btn.comments-btn:hover { background: rgba(37,99,168,0.4); }
 
 /* Collapsed/expanded case cards */
 .case-card.collapsed .case-body,
@@ -456,14 +460,18 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 
 /* Dark theme — applies only to collapsed cards. Expanded cards keep
    the light theme defined elsewhere. */
+/* Only override top/right/bottom — left edge keeps the status colour. */
 .case-card.collapsed {
   background: var(--ink2);
-  border-color: var(--ink2);
+  border-top-color: var(--ink2);
+  border-right-color: var(--ink2);
+  border-bottom-color: var(--ink2);
   color: var(--paper);
 }
 .case-card.collapsed.next-set {
-  /* Keep the gold accent visible against the dark fill */
-  border-color: var(--gold);
+  border-top-color: var(--gold);
+  border-right-color: var(--gold);
+  border-bottom-color: var(--gold);
 }
 .case-card.collapsed .case-title { color: var(--paper); }
 .case-card.collapsed .icon-btn {
@@ -638,6 +646,20 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
   </div>
 </div>
 
+<!-- Pending Advance Panel -->
+<div class="panel-overlay" id="panel-advance">
+  <div class="panel-topbar">
+    <button class="panel-back-btn" onclick="closePanel('advance')" title="Back to Cause List">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="panel-topbar-title">Pending Advance</div>
+    <span id="advance-panel-summary" style="font-size:11px;color:var(--ink4);font-weight:500"></span>
+  </div>
+  <div class="panel-scroll">
+    <div class="panel-section" id="advance-panel-content"></div>
+  </div>
+</div>
+
 <!-- Closed Cases Panel -->
 <div class="panel-overlay" id="panel-closed">
   <div class="panel-topbar">
@@ -770,7 +792,15 @@ function markOwnWrite(key){ ownRecentWrites.add(key); setTimeout(() => ownRecent
 let ivCaseId = null, ivIdx = null, ivIsTask = false, ivTaskId = null;
 
 /* ── Helpers ── */
-function todayStr(){ return new Date().toISOString().split('T')[0]; }
+// Local-date YYYY-MM-DD. Using toISOString() reports UTC, which causes
+// off-by-one bugs east of UTC (calendar click on the 17th lands on the 16th).
+function toLocalISO(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function todayStr(){ return toLocalISO(new Date()); }
 function fmtDMY(d){ if(!d) return ''; const [y,m,day]=d.split('-'); return `${day}-${m}-${y}`; }
 function fmtShort(d){ if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-PK',{day:'2-digit',month:'short'}); }
 function nowLabel(){ return new Date().toLocaleString('en-PK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}); }
@@ -989,7 +1019,7 @@ function renderCalStrip(){
   eb.onclick = openCalModal; container.appendChild(eb);
   for(let i=-3; i<=14; i++){
     const d = new Date(today); d.setDate(today.getDate()+i);
-    const ds = d.toISOString().split('T')[0];
+    const ds = toLocalISO(d);
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const hasCases = cases.some(c => !c.closed && (c.date===ds || c.nextDate===ds));
     const isActive = ds===selectedDate && !searchQuery, isToday = ds===todayStr();
@@ -1007,29 +1037,14 @@ function renderCalStrip(){
 }
 
 function renderStats(){
-  const inSearch = !!searchQuery;
-  const closedCount = cases.filter(c => c.closed).length;
-  const closedPill = `<div class="stat-pill clickable" onclick="openPanel('closed')" title="View closed cases"><div class="stat-dot" style="background:var(--ink4)"></div><span class="stat-num">${closedCount}</span> Closed</div>`;
-  if(inSearch){
-    const matched = cases.filter(c => !c.closed && caseMatches(c, searchQuery));
-    const pending = matched.reduce((s,c) => s + (c.tasks||[]).filter(t => !t.completed).length, 0);
-    document.getElementById('stats-bar').innerHTML = `
-      <div class="stat-pill"><div class="stat-dot" style="background:var(--ink2)"></div><span class="stat-num">${matched.length}</span> Match${matched.length===1?'':'es'}</div>
-      <div class="stat-pill"><div class="stat-dot" style="background:var(--violet2)"></div><span class="stat-num">${pending}</span> Pending Task${pending===1?'':'s'}</div>
-      ${closedPill}`;
-    return;
-  }
-  const dc = cases.filter(c => !c.closed && c.date===selectedDate);
-  const total = dc.length, present = dc.filter(c=>c.judgeStatus==='Y').length;
-  const absent = dc.filter(c=>c.judgeStatus==='N').length, withNext = dc.filter(c=>c.nextDate).length;
-  const pendingTasks = dc.reduce((s,c) => s + (c.tasks||[]).filter(t => !t.completed).length, 0);
+  const total          = cases.length;
+  const closedCount    = cases.filter(c => c.closed).length;
+  const today          = todayStr();
+  const pendingAdvance = cases.filter(c => !c.closed && c.date && c.date <= today).length;
   document.getElementById('stats-bar').innerHTML = `
-    <div class="stat-pill"><div class="stat-dot" style="background:var(--ink2)"></div><span class="stat-num">${total}</span> Cases</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:var(--emerald)"></div><span class="stat-num">${present}</span> Judge Present</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:var(--crimson2)"></div><span class="stat-num">${absent}</span> Absent</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:var(--gold)"></div><span class="stat-num">${withNext}</span> Next Date Set</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:var(--violet2)"></div><span class="stat-num">${pendingTasks}</span> Pending Task${pendingTasks===1?'':'s'}</div>
-    ${closedPill}`;
+    <div class="stat-pill"><div class="stat-dot" style="background:var(--ink2)"></div><span class="stat-num">${total}</span> Total Cases</div>
+    <div class="stat-pill clickable" onclick="openPanel('closed')" title="View closed cases"><div class="stat-dot" style="background:var(--ink4)"></div><span class="stat-num">${closedCount}</span> Closed Cases</div>
+    <div class="stat-pill clickable" onclick="openPanel('advance')" title="Cases waiting to be advanced"><div class="stat-dot" style="background:var(--crimson2)"></div><span class="stat-num">${pendingAdvance}</span> Pending Advance</div>`;
 }
 
 function renderCases(){
@@ -1115,6 +1130,10 @@ function renderCases(){
         ${inSearch ? `<span class="search-result-date-pill"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${fmtDMY(c.date)}</span>`
                    : (hasNewToday ? `<span class="new-attach-indicator" style="margin-right:auto">📎 New today</span>` : `<div style="margin-right:auto"></div>`)}
         <div style="display:flex;gap:6px;align-items:center">
+          <button class="icon-btn comments-btn" onclick="scrollToComments('${c.id}')" title="Comments">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+            ${comments.length>0?`<span class="badge-count">${comments.length}</span>`:''}
+          </button>
           <button class="icon-btn tasks-btn" onclick="toggleTasks('${c.id}')" title="Tasks">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
             ${pendingTaskCount>0?`<span class="badge-count amber">${pendingTaskCount}</span>`:''}
@@ -1152,35 +1171,8 @@ function renderCases(){
         <div class="date-field"><span class="date-field-label">Next Date</span><input type="date" class="next-date-picker ${c.nextDate?'set':''}" value="${c.nextDate||''}" onchange="setNextDate('${c.id}',this.value)"></div>
       </div>
 
-      <!-- Tasks -->
-      <div class="tasks-section" id="tasks-section-${c.id}">
-        <div class="tasks-toggle" onclick="toggleTasks('${c.id}')">
-          <div class="tasks-toggle-left">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-            Tasks
-            ${pendingTaskCount>0?`<span class="task-pending-chip">${pendingTaskCount} pending</span>`:taskCount>0?`<span class="task-done-chip">All done ✓</span>`:''}
-          </div>
-          <span class="tasks-chevron" id="tasks-chevron-${c.id}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
-        </div>
-        <div class="tasks-body" id="tasks-body-${c.id}">
-          ${taskCount===0?`<div class="tasks-empty">No tasks yet — add one below</div>`:`<div class="task-list">${tasksHtml}</div>`}
-          <div id="add-task-form-${c.id}" style="display:none">
-            <div class="add-task-form">
-              <div class="add-task-title"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Task</div>
-              <div class="task-form-field"><label class="task-form-label">Nature of Task *</label><textarea class="task-form-textarea" id="tf-nature-${c.id}" placeholder="e.g. File written statement, Obtain certified copy, Serve notice..."></textarea></div>
-              <div class="task-form-row">
-                <div class="task-form-field"><label class="task-form-label">Assigned By *</label><input type="text" class="task-form-input" id="tf-by-${c.id}" value="${escapeHtml(getCommenterName())}" placeholder="Senior / Partner name"></div>
-                <div class="task-form-field"><label class="task-form-label">Assigned To *</label><input type="text" class="task-form-input" id="tf-to-${c.id}" placeholder="Team member name"></div>
-              </div>
-              <button class="task-save-btn" onclick="saveTask('${c.id}')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>Save Task</button>
-            </div>
-          </div>
-          <button class="show-add-task-btn" onclick="toggleAddTaskForm('${c.id}')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Task</button>
-        </div>
-      </div>
-
-      <!-- Comments -->
-      <div class="comments-section">
+      <!-- Comments (top) -->
+      <div class="comments-section" id="comments-section-${c.id}">
         <div class="comments-header">
           <span class="comments-title">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
@@ -1204,6 +1196,33 @@ function renderCases(){
           <button class="comment-send-btn" onclick="addComment('${c.id}')">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="tasks-section" id="tasks-section-${c.id}">
+        <div class="tasks-toggle" onclick="toggleTasks('${c.id}')">
+          <div class="tasks-toggle-left">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            Tasks
+            ${pendingTaskCount>0?`<span class="task-pending-chip">${pendingTaskCount} pending</span>`:''}
+          </div>
+          <span class="tasks-chevron" id="tasks-chevron-${c.id}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+        </div>
+        <div class="tasks-body" id="tasks-body-${c.id}">
+          ${taskCount===0?`<div class="tasks-empty">No tasks yet — add one below</div>`:`<div class="task-list">${tasksHtml}</div>`}
+          <div id="add-task-form-${c.id}" style="display:none">
+            <div class="add-task-form">
+              <div class="add-task-title"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Task</div>
+              <div class="task-form-field"><label class="task-form-label">Nature of Task *</label><textarea class="task-form-textarea" id="tf-nature-${c.id}" placeholder="e.g. File written statement, Obtain certified copy, Serve notice..."></textarea></div>
+              <div class="task-form-row">
+                <div class="task-form-field"><label class="task-form-label">Assigned By *</label><input type="text" class="task-form-input" id="tf-by-${c.id}" value="${escapeHtml(getCommenterName())}" placeholder="Senior / Partner name"></div>
+                <div class="task-form-field"><label class="task-form-label">Assigned To *</label><input type="text" class="task-form-input" id="tf-to-${c.id}" placeholder="Team member name"></div>
+              </div>
+              <button class="task-save-btn" onclick="saveTask('${c.id}')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>Save Task</button>
+            </div>
+          </div>
+          <button class="show-add-task-btn" onclick="toggleAddTaskForm('${c.id}')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Add Task</button>
         </div>
       </div>
 
@@ -1286,6 +1305,22 @@ function advanceCase(id){
   saveToFirebase(c)
     .then(() => { selectedDate = newDate; showToast('Case advanced to '+fmtDMY(newDate),'success'); })
     .catch(e => showToast('Error: '+e.message,'error'));
+}
+
+// Comments button on a card: expand the case if needed and scroll the
+// comments section into view.
+function scrollToComments(caseId){
+  if(!expandedCases.has(caseId)){
+    expandedCases.add(caseId);
+    render();
+    setTimeout(() => {
+      const el = document.getElementById('comments-section-'+caseId);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 80);
+  } else {
+    const el = document.getElementById('comments-section-'+caseId);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
 }
 
 /* ── Tasks ── */
@@ -1614,12 +1649,12 @@ function renderCalGrid(){
   const today = todayStr();
   for(let i=0; i<first.getDay(); i++){
     const d = new Date(first); d.setDate(d.getDate()-(first.getDay()-i));
-    const ds = d.toISOString().split('T')[0];
+    const ds = toLocalISO(d);
     html += `<div class="cal-cell other-month ${allDates.includes(ds)?'has-cases':''} ${ds===selectedDate?'selected':''}" onclick="pickCalDate('${ds}')">${d.getDate()}</div>`;
   }
   for(let i=1; i<=last.getDate(); i++){
     const d = new Date(calViewDate.getFullYear(),calViewDate.getMonth(),i);
-    const ds = d.toISOString().split('T')[0];
+    const ds = toLocalISO(d);
     html += `<div class="cal-cell ${ds===today?'today':''} ${allDates.includes(ds)?'has-cases':''} ${ds===selectedDate?'selected':''}" onclick="pickCalDate('${ds}')">${i}</div>`;
   }
   grid.innerHTML = html;
@@ -1646,6 +1681,7 @@ function openPanel(name){
   if(name==='attachments') renderAttachPanel();
   if(name==='comments')    renderCommentsPanel();
   if(name==='closed')      renderClosedPanel();
+  if(name==='advance')     renderAdvancePanel();
 }
 function closePanel(name){
   document.getElementById('panel-'+name).classList.remove('open');
@@ -1879,7 +1915,7 @@ function renderAttachPanel(){
   // Group by caseId, preserve insertion order
   const byCase = {};
   filtered.forEach(x => {
-    if(!byCase[x.caseId]) byCase[x.caseId] = { caseTitle: x.caseTitle, caseDate: x.caseDate, items: [] };
+    if(!byCase[x.caseId]) byCase[x.caseId] = { caseId: x.caseId, caseTitle: x.caseTitle, caseDate: x.caseDate, items: [] };
     byCase[x.caseId].items.push(x);
   });
 
@@ -1983,6 +2019,40 @@ function renderCommentsPanel(){
           <div class="ptask-dates">
             <span style="color:var(--sapphire);font-weight:700">${escapeHtml(cm.author||'Team')}</span>
             <span>${escapeHtml(cm.time||'')}</span>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`).join('');
+}
+
+/* ── Pending Advance Panel ──
+   Cases scheduled for today or earlier that haven't been closed yet.
+   These are stale entries the lawyer needs to advance or close. */
+function renderAdvancePanel(){
+  const container = document.getElementById('advance-panel-content');
+  const summary = document.getElementById('advance-panel-summary');
+  const today = todayStr();
+  const stale = cases
+    .filter(c => !c.closed && c.date && c.date <= today)
+    .sort((a,b) => (a.date||'').localeCompare(b.date||'') || (a.srNo||9999) - (b.srNo||9999));
+  summary.textContent = `${stale.length} case${stale.length===1?'':'s'} waiting`;
+  if(!stale.length){
+    container.innerHTML = `<div class="panel-empty"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 13l4 4L19 7"/></svg><p>Nothing to advance — you're up to date.</p></div>`;
+    return;
+  }
+  // Group by hearing date so the lawyer can see how stale things are.
+  const byDate = {};
+  stale.forEach(c => { if(!byDate[c.date]) byDate[c.date] = []; byDate[c.date].push(c); });
+  container.innerHTML = Object.keys(byDate).sort().map(d => `<div class="panel-case-block">
+    <div class="panel-case-title" style="cursor:default">${fmtDMY(d)}<div class="panel-case-date">${byDate[d].length} case${byDate[d].length===1?'':'s'}</div></div>
+    <div class="panel-items-wrap">
+      ${byDate[d].map(c => `<div class="ptask-item" onclick="jumpToCase('${c.id}')" style="cursor:pointer">
+        <div class="ptask-info">
+          <div class="ptask-nature">${escapeHtml(c.title)}</div>
+          <div class="ptask-chips">
+            <span class="ptask-chip by">Judge: ${escapeHtml(c.judge||'—')}</span>
+            ${c.nextDate?`<span class="ptask-chip to">Next: ${fmtDMY(c.nextDate)}</span>`:'<span class="ptask-chip" style="background:var(--paper2);color:var(--ink3)">No next date</span>'}
           </div>
         </div>
       </div>`).join('')}
