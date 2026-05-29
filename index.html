@@ -371,6 +371,12 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .cal-cell.has-cases::after { content:''; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); }
 .cal-cell.selected::after { background: var(--gold2); }
 
+/* Floating "Back to {panel}" button shown after a panel row navigates
+   the user into a single case in the main cause list. */
+.back-to-panel-fab { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(80px); z-index: 150; background: var(--ink); color: var(--gold2); border: none; border-radius: 99px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow-lg); display: inline-flex; align-items: center; gap: 6px; font-family: var(--font); transition: transform 0.3s cubic-bezier(0.34,1.1,0.64,1); }
+.back-to-panel-fab.show { transform: translateX(-50%) translateY(0); }
+.back-to-panel-fab svg { width: 14px; height: 14px; }
+
 /* Live notification popups (top-right) */
 #notif-container { position: fixed; top: 12px; right: 12px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; max-width: 360px; width: calc(100vw - 24px); pointer-events: none; }
 .notif-toast { pointer-events: all; background: white; border: 1px solid var(--paper3); border-radius: 12px; padding: 10px 12px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: notif-in 0.3s cubic-bezier(0.34,1.1,0.64,1); }
@@ -677,6 +683,12 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 <!-- Notification container (top-right popups) -->
 <div id="notif-container"></div>
 
+<!-- Floating "back to panel" button (hidden by default) -->
+<button class="back-to-panel-fab" id="back-to-panel-fab" onclick="backToSourcePanel()">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+  <span id="back-to-panel-label">Back</span>
+</button>
+
 <!-- Add/Edit Sheet -->
 <div class="overlay" id="add-overlay" onclick="handleOverlayClick(event,'add-overlay')">
   <div class="sheet">
@@ -780,6 +792,13 @@ let taskFilter = 'all';
 let attachFilter = 'all';
 let expandedCases = new Set();
 
+// Lightweight nav stack for "panel → single case → back" flows.
+// We remember which panel the user came from + its scroll position, so
+// the back FAB can restore the panel in exactly the state it was left.
+let cameFromPanel = null;
+const panelScrollPositions = {};
+const PANEL_TITLES = { tasks:'All Tasks', attachments:'All Attachments', comments:'All Comments', closed:'Closed Cases', advance:'Pending Advance' };
+
 // Real-time notification plumbing.
 // prevCases captures the last-seen state so the next snapshot can be diffed.
 // ownRecentWrites records IDs of items this user just wrote so they don't get
@@ -809,12 +828,50 @@ function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID(
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // Status colour for the case card's left edge.
-// Priority: nextDate set (red) → has comments/tasks (yellow) → Sr#/Judge updated (green) → default (blue).
+// Priority: nextDate set → red. Any activity on the *current* hearing
+// cycle (Sr#/Judge/comment/task/attachment) → green. Otherwise blue.
+// Items carry a .cycle stamp so that tasks/attachments preserved
+// through Advance don't count towards the new hearing's status.
 function caseStatus(c){
   if (c.nextDate) return 'red';
-  if ((c.comments||[]).length > 0 || (c.tasks||[]).length > 0) return 'yellow';
+  const cycle = c.cycle || 0;
   if (c.srNo || c.judgeStatus) return 'green';
+  if ((c.comments||[]).some(x => (x.cycle||0) === cycle)) return 'green';
+  if ((c.tasks||[]).some(x => (x.cycle||0) === cycle)) return 'green';
+  if ((c.attachments||[]).some(x => (x.cycle||0) === cycle)) return 'green';
   return 'blue';
+}
+
+// Panel-row click handler that opens a case in the main cause list
+// while remembering which panel to return to. The panel's scroll
+// position is captured so the back FAB can restore it exactly.
+function openCaseFromPanel(caseId, sourcePanel){
+  const scrollEl = document.querySelector('#panel-'+sourcePanel+' .panel-scroll');
+  if (scrollEl) panelScrollPositions[sourcePanel] = scrollEl.scrollTop;
+  cameFromPanel = sourcePanel;
+  const fab = document.getElementById('back-to-panel-fab');
+  const label = document.getElementById('back-to-panel-label');
+  if (label) label.textContent = 'Back to ' + (PANEL_TITLES[sourcePanel] || 'list');
+  if (fab) { fab.classList.add('show'); }
+  jumpToCase(caseId);
+}
+
+// Restore the source panel exactly as the user left it.
+function backToSourcePanel(){
+  if (!cameFromPanel) { document.getElementById('back-to-panel-fab').classList.remove('show'); return; }
+  const panel = document.getElementById('panel-'+cameFromPanel);
+  if (panel) panel.classList.add('open');
+  document.getElementById('hdr-tasks-btn').classList.toggle('active',    cameFromPanel==='tasks');
+  document.getElementById('hdr-attach-btn').classList.toggle('active',   cameFromPanel==='attachments');
+  document.getElementById('hdr-comments-btn').classList.toggle('active', cameFromPanel==='comments');
+  document.getElementById('hdr-closed-btn').classList.toggle('active',   cameFromPanel==='closed');
+  // Restore scroll after the next paint so the layout has settled.
+  const scrollEl = panel ? panel.querySelector('.panel-scroll') : null;
+  if (scrollEl && panelScrollPositions[cameFromPanel] !== undefined) {
+    requestAnimationFrame(() => { scrollEl.scrollTop = panelScrollPositions[cameFromPanel]; });
+  }
+  document.getElementById('back-to-panel-fab').classList.remove('show');
+  cameFromPanel = null;
 }
 
 // Navigate from a panel row straight to the case in the cause list.
@@ -978,7 +1035,29 @@ function caseMatches(c, q){
 }
 
 /* ── Render ── */
-function render(){ renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); updateTasksBadge(); updateAttachBadge(); updateCommentsBadge(); updateClosedBadge(); }
+function render(){ renderCalStrip(); renderStats(); renderCases(); updateHeaderDate(); updateTasksBadge(); updateAttachBadge(); updateCommentsBadge(); updateClosedBadge(); refreshOpenPanels(); }
+
+// If a panel is currently open, re-run its render so the user sees
+// live changes (e.g. a case disappears from Pending Advance the moment
+// it's advanced elsewhere). Scroll position is preserved across the
+// re-render so the list doesn't jump.
+const PANEL_RENDER_FNS = {
+  tasks:       () => renderTasksPanel(),
+  attachments: () => renderAttachPanel(),
+  comments:    () => renderCommentsPanel(),
+  closed:      () => renderClosedPanel(),
+  advance:     () => renderAdvancePanel()
+};
+function refreshOpenPanels(){
+  Object.keys(PANEL_RENDER_FNS).forEach(name => {
+    const p = document.getElementById('panel-'+name);
+    if(!p || !p.classList.contains('open')) return;
+    const scrollEl = p.querySelector('.panel-scroll');
+    const top = scrollEl ? scrollEl.scrollTop : 0;
+    PANEL_RENDER_FNS[name]();
+    if (scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = top; });
+  });
+}
 
 function updateHeaderDate(){
   document.getElementById('header-date-label').textContent = selectedDate===todayStr() ? 'Today' : fmtShort(selectedDate);
@@ -1301,7 +1380,10 @@ function advanceCase(id){
   c.lastDate = c.date; c.date = newDate; c.nextDate = null;
   c.judgeStatus = null; c.srNo = null; c.done = false;
   c.comments = [];
-  // Tasks carry forward — do NOT clear them
+  // Bump the cycle so carried-forward tasks/attachments stop counting
+  // as current-cycle activity (status returns to Blue until something new).
+  c.cycle = (c.cycle || 0) + 1;
+  // Tasks/attachments carry forward — do NOT clear them
   saveToFirebase(c)
     .then(() => { selectedDate = newDate; showToast('Case advanced to '+fmtDMY(newDate),'success'); })
     .catch(e => showToast('Error: '+e.message,'error'));
@@ -1351,7 +1433,7 @@ function saveTask(caseId){
   const to = document.getElementById('tf-to-'+caseId).value.trim();
   if(!nature||!by||!to){ showToast('Nature, Assigned By and Assigned To are required','warning'); return; }
   if(!c.tasks) c.tasks = [];
-  const newTask = { id: uid(), nature, assignedBy: by, assignedTo: to, assignedDate: todayStr(), completed: false, completedDate: null, attachments: [] };
+  const newTask = { id: uid(), nature, assignedBy: by, assignedTo: to, assignedDate: todayStr(), completed: false, completedDate: null, attachments: [], cycle: c.cycle||0 };
   c.tasks.push(newTask);
   markOwnWrite('task:'+newTask.id);
   saveToFirebase(c)
@@ -1414,7 +1496,7 @@ function addComment(caseId){
   const author = nameInp ? nameInp.value.trim() : 'Team';
   if(!text){ showToast('Type a comment first','warning'); return; }
   if(!c.comments) c.comments = [];
-  const newComment = { text, author: author||'Team', time: nowLabel(), id: uid() };
+  const newComment = { text, author: author||'Team', time: nowLabel(), id: uid(), cycle: c.cycle||0 };
   c.comments.push(newComment);
   markOwnWrite('comment:'+newComment.id);
   saveToFirebase(c).then(() => showToast('Comment added','success')).catch(e => showToast('Error: '+e.message,'error'));
@@ -1528,7 +1610,8 @@ function confirmAttach(){
       dataUrl: pendingAttachDataUrl || null,
       addedDate: todayStr(),
       addedBy: getCommenterName()||'Team',
-      id: uid()
+      id: uid(),
+      cycle: c.cycle||0
     };
     t.attachments.push(newAttach);
     markOwnWrite('attach:'+newAttach.id);
@@ -1550,7 +1633,8 @@ function confirmAttach(){
     dataUrl: pendingAttachDataUrl || null,
     addedDate: todayStr(),
     addedBy: getCommenterName()||'Team',
-    id: uid()
+    id: uid(),
+    cycle: c.cycle||0
   };
   c.attachments.push(newCaseAttach);
   markOwnWrite('attach:'+newCaseAttach.id);
@@ -1615,7 +1699,7 @@ function saveCase(){
       room: document.getElementById('f-room').value.trim(),
       proceedings: document.getElementById('f-proceedings').value.trim(),
       srNo: null, judgeStatus: null, nextDate: null, lastDate: null, done: false,
-      comments: [], attachments: [], tasks: [],
+      comments: [], attachments: [], tasks: [], cycle: 0,
       created: new Date().toISOString()
     };
     markOwnWrite('case:'+rec.id);
@@ -1672,6 +1756,10 @@ function pickCalDate(ds){
 
 /* ── Panels (All Tasks / All Attachments / Closed Cases) ── */
 function openPanel(name){
+  // Opening a panel from the header voids any pending "back to panel" state.
+  cameFromPanel = null;
+  const fab = document.getElementById('back-to-panel-fab');
+  if (fab) fab.classList.remove('show');
   document.getElementById('panel-'+name).classList.add('open');
   document.getElementById('hdr-tasks-btn').classList.toggle('active',    name==='tasks');
   document.getElementById('hdr-attach-btn').classList.toggle('active',   name==='attachments');
@@ -2047,7 +2135,7 @@ function renderAdvancePanel(){
   container.innerHTML = Object.keys(byDate).sort().map(d => `<div class="panel-case-block">
     <div class="panel-case-title" style="cursor:default">${fmtDMY(d)}<div class="panel-case-date">${byDate[d].length} case${byDate[d].length===1?'':'s'}</div></div>
     <div class="panel-items-wrap">
-      ${byDate[d].map(c => `<div class="ptask-item" onclick="jumpToCase('${c.id}')" style="cursor:pointer">
+      ${byDate[d].map(c => `<div class="ptask-item" onclick="openCaseFromPanel('${c.id}','advance')" style="cursor:pointer">
         <div class="ptask-info">
           <div class="ptask-nature">${escapeHtml(c.title)}</div>
           <div class="ptask-chips">
