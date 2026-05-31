@@ -108,14 +108,16 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .no-cases p { font-size: 14px; }
 
 /* Case Card */
-.case-card { background: white; border-radius: var(--radius); border: 1px solid var(--paper3); border-left: 4px solid var(--sapphire2); margin-bottom: 12px; overflow: hidden; transition: border-color 0.3s; box-shadow: var(--shadow); animation: slideIn 0.25s ease; }
-.case-card.next-set { border-color: var(--gold); border-width: 1px; border-left-width: 4px; }
+.case-card { background: white; border-radius: var(--radius); border: 1px solid var(--paper3); border-left: 5px solid var(--sapphire2); margin-bottom: 12px; overflow: hidden; transition: background-color 0.25s, border-color 0.25s; box-shadow: var(--shadow); animation: slideIn 0.25s ease; }
 
-/* Status colours along the left edge — priority: red > yellow > green > blue */
-.case-card.status-blue   { border-left-color: var(--sapphire2); }
-.case-card.status-green  { border-left-color: var(--emerald2); }
-.case-card.status-yellow { border-left-color: var(--amber2); }
-.case-card.status-red    { border-left-color: var(--crimson2); }
+/* Full-block status fills — expanded cards get a soft tint, collapsed
+   cards get a saturated dark fill. Left edge stays as a stronger
+   accent so the status is unmistakable in either mode. */
+
+/* Expanded (light) — tinted card body */
+.case-card.status-blue   { background: #eaf1fa; border-left-color: var(--sapphire2); }
+.case-card.status-green  { background: var(--emerald3); border-left-color: var(--emerald2); }
+.case-card.status-red    { background: var(--crimson3); border-left-color: var(--crimson2); }
 @keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Card top bar */
@@ -464,20 +466,34 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .case-chevron.open { transform: rotate(180deg); }
 .case-title-clickable { cursor: pointer; user-select: none; }
 
-/* Dark theme — applies only to collapsed cards. Expanded cards keep
-   the light theme defined elsewhere. */
-/* Only override top/right/bottom — left edge keeps the status colour. */
+/* Dark theme — collapsed cards. Whole block takes the status colour
+   so the state is visible at a glance even before expanding. Left
+   edge is overridden per-status below for a stronger accent. */
 .case-card.collapsed {
-  background: var(--ink2);
-  border-top-color: var(--ink2);
-  border-right-color: var(--ink2);
-  border-bottom-color: var(--ink2);
   color: var(--paper);
 }
-.case-card.collapsed.next-set {
-  border-top-color: var(--gold);
-  border-right-color: var(--gold);
-  border-bottom-color: var(--gold);
+/* Full-block status fills (collapsed). Top/right/bottom match the fill
+   so the card reads as a single solid colour. */
+.case-card.collapsed.status-blue {
+  background: #1c2940;
+  border-top-color: #1c2940;
+  border-right-color: #1c2940;
+  border-bottom-color: #1c2940;
+  border-left-color: var(--sapphire2);
+}
+.case-card.collapsed.status-green {
+  background: #15442a;
+  border-top-color: #15442a;
+  border-right-color: #15442a;
+  border-bottom-color: #15442a;
+  border-left-color: var(--emerald2);
+}
+.case-card.collapsed.status-red {
+  background: #4a1818;
+  border-top-color: #4a1818;
+  border-right-color: #4a1818;
+  border-bottom-color: #4a1818;
+  border-left-color: var(--crimson2);
 }
 .case-card.collapsed .case-title { color: var(--paper); }
 .case-card.collapsed .icon-btn {
