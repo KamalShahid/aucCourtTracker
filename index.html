@@ -894,7 +894,7 @@ function backToSourcePanel(){
 function jumpToCase(caseId){
   const c = cases.find(x => x.id===caseId); if(!c) return;
   // Close any open panel
-  ['tasks','attachments','closed','comments'].forEach(n => {
+  ['tasks','attachments','closed','comments','advance'].forEach(n => {
     const p = document.getElementById('panel-'+n);
     if(p) p.classList.remove('open');
   });
