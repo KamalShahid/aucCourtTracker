@@ -843,32 +843,60 @@ function getCommenterName(){ return localStorage.getItem(COMMENTER_KEY)||''; }
 function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2,8)); }
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// Status colour for the case card.
-// Hierarchy:
+// Status colour for the case card. Scope is *this hearing only* — never
+// the case as a whole.
+//
 //   Red   — nextDate is an explicit non-empty date string.
-//   Green — Sr# is a positive number, OR judgeStatus is 'Y'/'N',
-//           OR at least one comment/task/attachment exists on the
-//           CURRENT hearing cycle. After Advance the case's .cycle
-//           is bumped so carried-forward items no longer match.
-//   Blue  — everything else.
-// Every check is defensive: null, undefined, '', 0, NaN, [], and
-// objects missing their content field are all treated as "no activity".
+//   Green — at least one of the following is true ON THIS HEARING:
+//             • Sr# is a positive number
+//             • judgeStatus is 'Y' or 'N'
+//             • a non-empty comment exists
+//             • a non-empty task exists on the current cycle
+//             • a non-empty attachment exists on the current cycle
+//   Blue  — everything else (the default).
+//
+// Per-hearing scoping is enforced as follows:
+//   - srNo / judgeStatus are reset to null by advanceCase, so any
+//     non-null value reflects user input on the current hearing.
+//   - comments are cleared by advanceCase, so any surviving comment
+//     belongs to the current hearing.
+//   - tasks and attachments carry forward across Advance, so we use a
+//     `cycle` stamp written when the item is created. Items without
+//     a stamp are *legacy* data — assume current cycle on cases that
+//     have never been advanced, and previous cycle on cases that have
+//     (c.lastDate is set the moment Advance fires).
 function caseStatus(c){
   if (!c) return 'blue';
   if (typeof c.nextDate === 'string' && c.nextDate.length > 0) return 'red';
 
-  const cycle    = Number(c.cycle) || 0;
   const hasSrNo  = typeof c.srNo === 'number' && c.srNo > 0;
   const hasJudge = c.judgeStatus === 'Y' || c.judgeStatus === 'N';
   if (hasSrNo || hasJudge) return 'green';
 
-  const onCycle = (arr, key) => Array.isArray(arr) && arr.some(x =>
-    x && typeof x[key] === 'string' && x[key].length > 0 &&
-    (Number(x.cycle) || 0) === cycle
+  const hasComment = Array.isArray(c.comments) && c.comments.some(x =>
+    x && typeof x.text === 'string' && x.text.length > 0
   );
-  if (onCycle(c.comments,    'text'))   return 'green';
-  if (onCycle(c.tasks,       'nature')) return 'green';
-  if (onCycle(c.attachments, 'name'))   return 'green';
+  if (hasComment) return 'green';
+
+  const cycle = Number(c.cycle) || 0;
+  const wasAdvanced = typeof c.lastDate === 'string' && c.lastDate.length > 0;
+  const onCurrentHearing = x => {
+    if (typeof x.cycle === 'number') return x.cycle === cycle;
+    // Unstamped legacy items: only count them as current-hearing
+    // activity if the case has never been advanced.
+    return !wasAdvanced;
+  };
+
+  const hasTask = Array.isArray(c.tasks) && c.tasks.some(x =>
+    x && typeof x.nature === 'string' && x.nature.length > 0 && onCurrentHearing(x)
+  );
+  if (hasTask) return 'green';
+
+  const hasAttachment = Array.isArray(c.attachments) && c.attachments.some(x =>
+    x && typeof x.name === 'string' && x.name.length > 0 && onCurrentHearing(x)
+  );
+  if (hasAttachment) return 'green';
+
   return 'blue';
 }
 
