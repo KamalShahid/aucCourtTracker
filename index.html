@@ -843,18 +843,32 @@ function getCommenterName(){ return localStorage.getItem(COMMENTER_KEY)||''; }
 function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2,8)); }
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// Status colour for the case card's left edge.
-// Priority: nextDate set → red. Any activity on the *current* hearing
-// cycle (Sr#/Judge/comment/task/attachment) → green. Otherwise blue.
-// Items carry a .cycle stamp so that tasks/attachments preserved
-// through Advance don't count towards the new hearing's status.
+// Status colour for the case card.
+// Hierarchy:
+//   Red   — nextDate is an explicit non-empty date string.
+//   Green — Sr# is a positive number, OR judgeStatus is 'Y'/'N',
+//           OR at least one comment/task/attachment exists on the
+//           CURRENT hearing cycle. After Advance the case's .cycle
+//           is bumped so carried-forward items no longer match.
+//   Blue  — everything else.
+// Every check is defensive: null, undefined, '', 0, NaN, [], and
+// objects missing their content field are all treated as "no activity".
 function caseStatus(c){
-  if (c.nextDate) return 'red';
-  const cycle = c.cycle || 0;
-  if (c.srNo || c.judgeStatus) return 'green';
-  if ((c.comments||[]).some(x => (x.cycle||0) === cycle)) return 'green';
-  if ((c.tasks||[]).some(x => (x.cycle||0) === cycle)) return 'green';
-  if ((c.attachments||[]).some(x => (x.cycle||0) === cycle)) return 'green';
+  if (!c) return 'blue';
+  if (typeof c.nextDate === 'string' && c.nextDate.length > 0) return 'red';
+
+  const cycle    = Number(c.cycle) || 0;
+  const hasSrNo  = typeof c.srNo === 'number' && c.srNo > 0;
+  const hasJudge = c.judgeStatus === 'Y' || c.judgeStatus === 'N';
+  if (hasSrNo || hasJudge) return 'green';
+
+  const onCycle = (arr, key) => Array.isArray(arr) && arr.some(x =>
+    x && typeof x[key] === 'string' && x[key].length > 0 &&
+    (Number(x.cycle) || 0) === cycle
+  );
+  if (onCycle(c.comments,    'text'))   return 'green';
+  if (onCycle(c.tasks,       'nature')) return 'green';
+  if (onCycle(c.attachments, 'name'))   return 'green';
   return 'blue';
 }
 
@@ -1180,7 +1194,7 @@ function renderCases(){
     const attachCount = attachments.length;
     const taskCount = tasks.length;
     const pendingTaskCount = tasks.filter(t => !t.completed).length;
-    const hasNewToday = attachments.some(a => a.addedDate===todayStr()) && c.date!==todayStr();
+    // "New today" badge removed per spec — no auto-badging on case blocks.
 
     const tasksHtml = tasks.map(t => {
       const tAttachments = t.attachments || [];
@@ -1223,7 +1237,7 @@ function renderCases(){
 
       <div class="card-topbar">
         ${inSearch ? `<span class="search-result-date-pill"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${fmtDMY(c.date)}</span>`
-                   : (hasNewToday ? `<span class="new-attach-indicator" style="margin-right:auto">📎 New today</span>` : `<div style="margin-right:auto"></div>`)}
+                   : `<div style="margin-right:auto"></div>`}
         <div style="display:flex;gap:6px;align-items:center">
           <button class="icon-btn comments-btn" onclick="scrollToComments('${c.id}')" title="Comments">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
@@ -1328,7 +1342,6 @@ function renderCases(){
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
             See Attachments
             ${attachCount>0?`<span class="attach-count">${attachCount}</span>`:''}
-            ${hasNewToday?`<span class="attach-new-indicator">New today</span>`:''}
           </div>
           <span class="attach-chevron" id="attach-chevron-${c.id}"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
         </div>
