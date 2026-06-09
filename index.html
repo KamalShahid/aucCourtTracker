@@ -50,6 +50,17 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .hdr-icon-btn svg { width: 17px; height: 17px; }
 .hdr-badge { position: absolute; top: -3px; right: -3px; background: var(--amber2); color: white; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 99px; min-width: 16px; text-align: center; }
 .hdr-divider { width: 1px; height: 22px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+
+/* Dedicated nav row sitting below the brand row */
+.hdr-nav { background: var(--ink); border-top: 1px solid rgba(255,255,255,0.06); display: flex; padding: 0 8px; gap: 4px; max-width: 900px; margin: 0 auto; }
+.hdr-nav-tab { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 4px 10px; background: transparent; border: none; cursor: pointer; color: var(--ink4); font-family: var(--font); font-size: 11px; font-weight: 500; letter-spacing: 0.2px; transition: color 0.15s; min-width: 0; }
+.hdr-nav-tab:hover { color: var(--paper); }
+.hdr-nav-tab.active { color: var(--gold2); }
+.hdr-nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 2px; background: var(--gold); border-radius: 2px 2px 0 0; }
+.hdr-nav-tab svg { width: 18px; height: 18px; }
+.hdr-nav-tab span:not(.hdr-badge) { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.hdr-nav-tab .hdr-badge { position: absolute; top: 4px; right: calc(50% - 22px); background: var(--amber2); color: white; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 99px; min-width: 16px; text-align: center; }
+@media (max-width: 380px) { .hdr-nav-tab span:not(.hdr-badge) { font-size: 10px; } }
 .header-date-btn { display: flex; align-items: center; gap: 6px; background: rgba(184,150,62,0.15); border: 1px solid rgba(184,150,62,0.3); border-radius: 8px; padding: 6px 10px; cursor: pointer; color: var(--gold2); font-size: 12px; font-weight: 500; font-family: var(--font); white-space: nowrap; }
 .header-date-btn svg { width: 13px; height: 13px; }
 .add-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
@@ -114,10 +125,10 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
    cards get a saturated dark fill. Left edge stays as a stronger
    accent so the status is unmistakable in either mode. */
 
-/* Expanded (light) — tinted card body */
-.case-card.status-blue   { background: #eaf1fa; border-left-color: var(--sapphire2); }
-.case-card.status-green  { background: var(--emerald3); border-left-color: var(--emerald2); }
-.case-card.status-red    { background: var(--crimson3); border-left-color: var(--crimson2); }
+/* Expanded (light) — softer, more muted tints */
+.case-card.status-blue   { background: #f0f4f9; border-left-color: #5d7fa8; }
+.case-card.status-green  { background: #eef5ef; border-left-color: #5a8a6b; }
+.case-card.status-red    { background: #f8eded; border-left-color: #a76060; }
 @keyframes slideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Card top bar */
@@ -414,6 +425,8 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .panel-back-btn svg { width: 18px; height: 18px; }
 .panel-filter-bar { padding: 10px 14px 6px; display: flex; gap: 6px; flex-wrap: wrap; background: white; border-bottom: 0.5px solid var(--paper3); flex-shrink: 0; }
 .filter-pill { padding: 5px 13px; border-radius: 99px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--paper3); background: white; color: var(--ink3); transition: all 0.15s; font-family: var(--font); }
+.task-assignee-select { width: 100%; border: 1.5px solid var(--paper3); border-radius: 8px; padding: 7px 10px; font-size: 12px; font-family: var(--font); color: var(--ink); background: white; cursor: pointer; }
+.task-assignee-select:focus { outline: none; border-color: var(--gold); }
 .filter-pill.active { background: var(--ink); color: var(--gold2); border-color: var(--ink); }
 .panel-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .panel-section { padding: 12px 14px 30px; }
@@ -441,6 +454,17 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
 .ptask-chip.to { background: var(--violet3); color: var(--violet); }
 .ptask-dates { font-size: 10px; color: var(--ink4); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
 .ptask-done-badge { font-size: 10px; font-weight: 700; color: var(--emerald); background: var(--emerald3); padding: 2px 7px; border-radius: 99px; display: inline-flex; align-items: center; gap: 3px; }
+
+/* Inline next-date + Advance controls within a Pending Advance row */
+.advance-row-inline { display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--paper); border-radius: 8px; flex-wrap: wrap; }
+.advance-row-label { font-size: 10px; font-weight: 600; color: var(--ink4); text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
+.advance-row-inline .next-date-picker { flex: 1; min-width: 130px; }
+.advance-quick-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; border: none; background: var(--gold); color: white; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font); transition: background 0.15s; }
+.advance-quick-btn:hover:not(:disabled) { background: var(--gold2); }
+.advance-quick-btn:disabled { background: var(--paper3); color: var(--ink4); cursor: not-allowed; }
+.advance-quick-btn svg { width: 12px; height: 12px; }
+.advance-clear-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--paper3); background: white; color: var(--ink3); font-size: 18px; font-weight: 700; line-height: 1; cursor: pointer; flex-shrink: 0; }
+.advance-clear-btn:hover { background: var(--crimson3); color: var(--crimson2); border-color: var(--crimson2); }
 .panel-empty { text-align: center; padding: 40px 16px; color: var(--ink4); }
 .panel-empty svg { width: 40px; height: 40px; opacity: 0.25; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
 .panel-empty p { font-size: 14px; }
@@ -471,29 +495,38 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
    edge is overridden per-status below for a stronger accent. */
 .case-card.collapsed {
   color: var(--paper);
+  margin-bottom: 8px;
 }
+/* Tighter, smaller layout when collapsed so more cases fit on screen */
+.case-card.collapsed .card-topbar { padding: 6px 10px 0; gap: 4px; }
+.case-card.collapsed .case-title-wrap { padding: 6px 12px 10px; }
+.case-card.collapsed .case-title { font-size: 14px; line-height: 1.25; letter-spacing: -0.2px; font-weight: 600; }
+.case-card.collapsed .icon-btn { width: 26px; height: 26px; border-radius: 6px; }
+.case-card.collapsed .icon-btn svg { width: 12px; height: 12px; }
+.case-card.collapsed .badge-count { font-size: 8px; padding: 0 4px; min-width: 12px; }
+.case-card.collapsed .case-chevron { width: 12px; height: 12px; }
 /* Full-block status fills (collapsed). Top/right/bottom match the fill
    so the card reads as a single solid colour. */
 .case-card.collapsed.status-blue {
-  background: #1c2940;
-  border-top-color: #1c2940;
-  border-right-color: #1c2940;
-  border-bottom-color: #1c2940;
-  border-left-color: var(--sapphire2);
+  background: #2a3349;
+  border-top-color: #2a3349;
+  border-right-color: #2a3349;
+  border-bottom-color: #2a3349;
+  border-left-color: #5d7fa8;
 }
 .case-card.collapsed.status-green {
-  background: #15442a;
-  border-top-color: #15442a;
-  border-right-color: #15442a;
-  border-bottom-color: #15442a;
-  border-left-color: var(--emerald2);
+  background: #243a2c;
+  border-top-color: #243a2c;
+  border-right-color: #243a2c;
+  border-bottom-color: #243a2c;
+  border-left-color: #5a8a6b;
 }
 .case-card.collapsed.status-red {
-  background: #4a1818;
-  border-top-color: #4a1818;
-  border-right-color: #4a1818;
-  border-bottom-color: #4a1818;
-  border-left-color: var(--crimson2);
+  background: #3d2424;
+  border-top-color: #3d2424;
+  border-right-color: #3d2424;
+  border-bottom-color: #3d2424;
+  border-left-color: #a76060;
 }
 .case-card.collapsed .case-title { color: var(--paper); }
 .case-card.collapsed .icon-btn {
@@ -569,23 +602,6 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
     </div>
     <div class="header-right">
       <div class="sync-wrap"><div class="sync-dot" id="sync-dot"></div><span class="sync-label" id="sync-label">Connecting…</span></div>
-      <button class="hdr-icon-btn" id="hdr-tasks-btn" onclick="openPanel('tasks')" title="All Tasks">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-        <span class="hdr-badge" id="hdr-tasks-badge" style="display:none"></span>
-      </button>
-      <button class="hdr-icon-btn" id="hdr-attach-btn" onclick="openPanel('attachments')" title="All Attachments">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-        <span class="hdr-badge" id="hdr-attach-badge" style="display:none;background:var(--sapphire2)"></span>
-      </button>
-      <button class="hdr-icon-btn" id="hdr-comments-btn" onclick="openPanel('comments')" title="All Comments">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-        <span class="hdr-badge" id="hdr-comments-badge" style="display:none;background:var(--sapphire)"></span>
-      </button>
-      <button class="hdr-icon-btn" id="hdr-closed-btn" onclick="openPanel('closed')" title="Closed Cases">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><path d="M9 14l2 2 4-4"/></svg>
-        <span class="hdr-badge" id="hdr-closed-badge" style="display:none;background:var(--ink4)"></span>
-      </button>
-      <div class="hdr-divider"></div>
       <button class="header-date-btn" onclick="openCalModal()">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         <span id="header-date-label">Today</span>
@@ -595,6 +611,28 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
       </button>
     </div>
   </div>
+  <nav class="hdr-nav">
+    <button class="hdr-nav-tab" id="hdr-tasks-btn" onclick="openPanel('tasks')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <span>Tasks</span>
+      <span class="hdr-badge" id="hdr-tasks-badge" style="display:none"></span>
+    </button>
+    <button class="hdr-nav-tab" id="hdr-attach-btn" onclick="openPanel('attachments')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+      <span>Attachments</span>
+      <span class="hdr-badge" id="hdr-attach-badge" style="display:none;background:var(--sapphire2)"></span>
+    </button>
+    <button class="hdr-nav-tab" id="hdr-comments-btn" onclick="openPanel('comments')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+      <span>Comments</span>
+      <span class="hdr-badge" id="hdr-comments-badge" style="display:none;background:var(--sapphire)"></span>
+    </button>
+    <button class="hdr-nav-tab" id="hdr-closed-btn" onclick="openPanel('closed')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/><path d="M9 14l2 2 4-4"/></svg>
+      <span>Closed</span>
+      <span class="hdr-badge" id="hdr-closed-badge" style="display:none;background:var(--ink4)"></span>
+    </button>
+  </nav>
 </header>
 
 <div class="cal-strip"><div class="cal-inner" id="cal-strip-inner"></div></div>
@@ -624,10 +662,14 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
     <div class="panel-topbar-title">All Tasks</div>
     <span id="tasks-panel-summary" style="font-size:11px;color:var(--ink4);font-weight:500"></span>
   </div>
-  <div class="panel-filter-bar">
-    <button class="filter-pill active" onclick="setTaskFilter('all',this)">All</button>
-    <button class="filter-pill" onclick="setTaskFilter('pending',this)">Pending</button>
-    <button class="filter-pill" onclick="setTaskFilter('completed',this)">Completed</button>
+  <div class="panel-filter-bar" style="flex-direction:column;align-items:stretch;gap:8px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="filter-pill active" onclick="setTaskFilter('pending',this)">Pending</button>
+      <button class="filter-pill" onclick="setTaskFilter('completed',this)">Completed</button>
+    </div>
+    <select id="task-assignee-filter" onchange="setTaskAssignee(this.value)" class="task-assignee-select">
+      <option value="">All team members</option>
+    </select>
   </div>
   <div class="panel-scroll">
     <div class="panel-section" id="tasks-panel-content"></div>
@@ -721,6 +763,7 @@ body { font-family: var(--font); background: var(--paper); color: var(--ink); mi
         <div class="form-field"><label class="form-label">Judge Name *</label><input type="text" class="form-input" id="f-judge" placeholder="Hon'ble Mr. Justice..."></div>
         <div class="form-field"><label class="form-label">Judge Room</label><input type="text" class="form-input" id="f-room" placeholder="e.g. Court Room 4"></div>
       </div>
+      <div class="form-field"><label class="form-label">On Behalf of (For — Plaintiff)</label><input type="text" class="form-input" id="f-onbehalf" placeholder="e.g. Mr. Ahmad Khan"></div>
       <div class="form-field"><label class="form-label">Proceedings / Stage</label><textarea class="form-textarea" id="f-proceedings" placeholder="e.g. Arguments on maintainability"></textarea></div>
       <button class="btn-primary" onclick="saveCase()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>Save Case</button>
       <button class="btn-warning" id="close-btn" style="display:none" onclick="toggleCaseClosed()">Close This Case</button>
@@ -804,7 +847,8 @@ let pendingAttachCaseId = null, pendingAttachFile = null, pendingAttachDataUrl =
 let pendingTaskCaseId = null, pendingTaskId = null;
 let firstSnapshotReceived = false;
 let searchQuery = '';
-let taskFilter = 'all';
+let taskFilter = 'pending';
+let taskAssigneeFilter = '';
 let attachFilter = 'all';
 let expandedCases = new Set();
 
@@ -940,7 +984,7 @@ function jumpToCase(caseId){
     const p = document.getElementById('panel-'+n);
     if(p) p.classList.remove('open');
   });
-  document.querySelectorAll('.hdr-icon-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.hdr-icon-btn, .hdr-nav-tab').forEach(b => b.classList.remove('active'));
   // If the case is closed, send the user to the Closed Cases panel instead.
   if (c.closed){ openPanel('closed'); return; }
   // Clear search and jump to the case's date with the card expanded.
@@ -1002,22 +1046,41 @@ function initFirebase(){
 // didn't author (filtered via ownRecentWrites).
 function diffAndNotify(prev, next){
   const prevMap = new Map(prev.map(p => [p.id, p]));
+  // "Current user" identity — using the saved commenter name as a proxy.
+  // Empty name means everything is visible (no identity → no filtering).
+  const me = (getCommenterName() || '').trim().toLowerCase();
+  const mentionsOf = text => {
+    const out = new Set();
+    (String(text||'').match(/@([\p{L}\p{N}_][\p{L}\p{N}_ .'-]{0,40})/gu) || [])
+      .forEach(m => out.add(m.slice(1).trim().toLowerCase().replace(/[ ]+$/,'')));
+    return out;
+  };
   next.forEach(c => {
     const p = prevMap.get(c.id);
     if (!p){
-      // Brand new case
+      // Brand new case — broadcast to everyone.
       if (!ownRecentWrites.has('case:'+c.id)) showNotification('case', `New case <strong>${escapeHtml(c.title)}</strong> added`, c.id);
       return;
     }
     (c.comments||[]).forEach(cm => {
-      if (!p.commentIds.includes(cm.id) && !ownRecentWrites.has('comment:'+cm.id)){
+      if (p.commentIds.includes(cm.id) || ownRecentWrites.has('comment:'+cm.id)) return;
+      const mentioned = mentionsOf(cm.text);
+      // Comment with @mentions → only notify the mentioned user. No
+      // mentions → broadcast (everyone watching the case).
+      if (mentioned.size > 0) {
+        if (!me || !mentioned.has(me)) return;
+        showNotification('comment', `<strong>@${escapeHtml(getCommenterName())}</strong> mentioned on <strong>${escapeHtml(c.title)}</strong>`, c.id);
+      } else {
         showNotification('comment', `New comment on <strong>${escapeHtml(c.title)}</strong> by ${escapeHtml(cm.author||'Team')}`, c.id);
       }
     });
     (c.tasks||[]).forEach(t => {
-      if (!p.taskIds.includes(t.id) && !ownRecentWrites.has('task:'+t.id)){
-        showNotification('task', `New task on <strong>${escapeHtml(c.title)}</strong>: ${escapeHtml((t.nature||'').slice(0,60))}${(t.nature||'').length>60?'…':''}`, c.id);
-      }
+      if (p.taskIds.includes(t.id) || ownRecentWrites.has('task:'+t.id)) return;
+      const assignee = (t.assignedTo||'').trim().toLowerCase();
+      // Task with an assignee → only notify the assignee. Unassigned
+      // tasks still broadcast.
+      if (assignee && me && assignee !== me) return;
+      showNotification('task', `New task on <strong>${escapeHtml(c.title)}</strong>: ${escapeHtml((t.nature||'').slice(0,60))}${(t.nature||'').length>60?'…':''}`, c.id);
     });
     (c.attachments||[]).forEach(a => {
       if (!p.attachmentIds.includes(a.id) && !ownRecentWrites.has('attach:'+a.id)){
@@ -1295,6 +1358,7 @@ function renderCases(){
           <div class="meta-item"><span class="meta-label">Judge</span><span class="meta-value judge">${escapeHtml(c.judge)}</span></div>
           <div class="meta-item"><span class="meta-label">Judge Room</span><span class="meta-value room">${escapeHtml(c.room||'—')}</span></div>
         </div>
+        ${c.onBehalfOf?`<div class="meta-item"><span class="meta-label">For — Plaintiff</span><span class="meta-value" style="color:var(--violet);font-weight:600">${escapeHtml(c.onBehalfOf)}</span></div>`:''}
         <div class="meta-item" style="margin-bottom:0"><span class="meta-label">Proceedings</span><span class="meta-value proceedings">${escapeHtml(c.proceedings||'—')}</span></div>
       </div>
 
@@ -1305,7 +1369,12 @@ function renderCases(){
 
       <div class="dates-row">
         <div class="date-field"><span class="date-field-label">Last Date</span>${lastDateHtml}</div>
-        <div class="date-field"><span class="date-field-label">Next Date</span><input type="date" class="next-date-picker ${c.nextDate?'set':''}" value="${c.nextDate||''}" onchange="setNextDate('${c.id}',this.value)"></div>
+        <div class="date-field"><span class="date-field-label">Next Date</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="date" class="next-date-picker ${c.nextDate?'set':''}" value="${c.nextDate||''}" onchange="setNextDate('${c.id}',this.value); this.blur();" style="flex:1">
+            ${c.nextDate?`<button class="advance-clear-btn" onclick="clearNextDate('${c.id}')" title="Clear next date">×</button>`:''}
+          </div>
+        </div>
       </div>
 
       <!-- Comments (top) -->
@@ -1716,6 +1785,7 @@ function openAddSheet(){
   document.getElementById('f-title').value = '';
   document.getElementById('f-judge').value = '';
   document.getElementById('f-room').value = '';
+  document.getElementById('f-onbehalf').value = '';
   document.getElementById('f-proceedings').value = '';
   document.getElementById('delete-btn').style.display = 'none';
   document.getElementById('close-btn').style.display = 'none';
@@ -1730,6 +1800,7 @@ function editCase(id){
   document.getElementById('f-title').value = c.title;
   document.getElementById('f-judge').value = c.judge;
   document.getElementById('f-room').value = c.room||'';
+  document.getElementById('f-onbehalf').value = c.onBehalfOf||'';
   document.getElementById('f-proceedings').value = c.proceedings||'';
   document.getElementById('delete-btn').style.display = '';
   const closeBtn = document.getElementById('close-btn');
@@ -1748,12 +1819,14 @@ function saveCase(){
     if(rec){
       rec.date = date; rec.title = title; rec.judge = judge;
       rec.room = document.getElementById('f-room').value.trim();
+      rec.onBehalfOf = document.getElementById('f-onbehalf').value.trim();
       rec.proceedings = document.getElementById('f-proceedings').value.trim();
     }
   } else {
     rec = {
       id: uid(), date, title, judge,
       room: document.getElementById('f-room').value.trim(),
+      onBehalfOf: document.getElementById('f-onbehalf').value.trim(),
       proceedings: document.getElementById('f-proceedings').value.trim(),
       srNo: null, judgeStatus: null, nextDate: null, lastDate: null, done: false,
       comments: [], attachments: [], tasks: [], cycle: 0,
@@ -1830,7 +1903,7 @@ function openPanel(name){
 }
 function closePanel(name){
   document.getElementById('panel-'+name).classList.remove('open');
-  document.querySelectorAll('.hdr-icon-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.hdr-icon-btn, .hdr-nav-tab').forEach(b => b.classList.remove('active'));
 }
 function setTaskFilter(f, btn){
   taskFilter = f;
@@ -1838,18 +1911,36 @@ function setTaskFilter(f, btn){
   btn.classList.add('active');
   renderTasksPanel();
 }
+function setTaskAssignee(name){
+  taskAssigneeFilter = name || '';
+  renderTasksPanel();
+}
 function renderTasksPanel(){
   const container = document.getElementById('tasks-panel-content');
   const summary = document.getElementById('tasks-panel-summary');
   const all = [];
-  cases.forEach(c => { (c.tasks||[]).forEach(t => all.push({ caseId: c.id, caseTitle: c.title, caseDate: c.date, task: t })); });
+  cases.forEach(c => { if(c.closed) return; (c.tasks||[]).forEach(t => all.push({ caseId: c.id, caseTitle: c.title, caseDate: c.date, task: t })); });
   const total = all.length;
   const pending = all.filter(x => !x.task.completed).length;
   summary.textContent = `${pending} pending · ${total-pending} done`;
   updateTasksBadge();
+
+  // Rebuild assignee dropdown options from all known task assignees,
+  // preserving the current selection.
+  const select = document.getElementById('task-assignee-filter');
+  if (select) {
+    const current = taskAssigneeFilter;
+    const names = [...new Set(all.map(x => (x.task.assignedTo||'').trim()).filter(Boolean))].sort();
+    select.innerHTML = '<option value="">All team members</option>' +
+      names.map(n => `<option value="${escapeHtml(n)}" ${n===current?'selected':''}>${escapeHtml(n)}</option>`).join('');
+  }
+
+  // Completed tasks default to hidden in the global view (Pending tab).
+  // Switching to Completed tab opts back in.
   let filtered = all;
-  if(taskFilter==='pending')   filtered = all.filter(x => !x.task.completed);
-  if(taskFilter==='completed') filtered = all.filter(x =>  x.task.completed);
+  if(taskFilter==='pending')   filtered = filtered.filter(x => !x.task.completed);
+  if(taskFilter==='completed') filtered = filtered.filter(x =>  x.task.completed);
+  if(taskAssigneeFilter)       filtered = filtered.filter(x => (x.task.assignedTo||'').trim() === taskAssigneeFilter);
   if(!filtered.length){
     container.innerHTML = `<div class="panel-empty"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 11l3 3L22 4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><p>No tasks found</p></div>`;
     return;
@@ -2192,17 +2283,53 @@ function renderAdvancePanel(){
   container.innerHTML = Object.keys(byDate).sort().map(d => `<div class="panel-case-block">
     <div class="panel-case-title" style="cursor:default">${fmtDMY(d)}<div class="panel-case-date">${byDate[d].length} case${byDate[d].length===1?'':'s'}</div></div>
     <div class="panel-items-wrap">
-      ${byDate[d].map(c => `<div class="ptask-item" onclick="openCaseFromPanel('${c.id}','advance')" style="cursor:pointer">
-        <div class="ptask-info">
-          <div class="ptask-nature">${escapeHtml(c.title)}</div>
-          <div class="ptask-chips">
-            <span class="ptask-chip by">Judge: ${escapeHtml(c.judge||'—')}</span>
-            ${c.nextDate?`<span class="ptask-chip to">Next: ${fmtDMY(c.nextDate)}</span>`:'<span class="ptask-chip" style="background:var(--paper2);color:var(--ink3)">No next date</span>'}
+      ${byDate[d].map(c => `<div class="ptask-item" style="flex-direction:column;align-items:stretch;gap:8px">
+        <div style="display:flex;align-items:flex-start;gap:10px;cursor:pointer" onclick="openCaseFromPanel('${c.id}','advance')">
+          <div class="ptask-info">
+            <div class="ptask-nature">${escapeHtml(c.title)}</div>
+            <div class="ptask-chips">
+              <span class="ptask-chip by">Judge: ${escapeHtml(c.judge||'—')}</span>
+            </div>
           </div>
+        </div>
+        <div class="advance-row-inline" onclick="event.stopPropagation()">
+          <label class="advance-row-label">Next date</label>
+          <input type="date" class="next-date-picker ${c.nextDate?'set':''}" value="${c.nextDate||''}" onchange="setNextDate('${c.id}', this.value); this.blur();">
+          <button class="advance-quick-btn" ${c.nextDate?'':'disabled'} onclick="advanceFromPanel('${c.id}')">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+            Advance
+          </button>
+          ${c.nextDate?`<button class="advance-clear-btn" onclick="clearNextDate('${c.id}')" title="Clear next date">×</button>`:''}
         </div>
       </div>`).join('')}
     </div>
   </div>`).join('');
+}
+
+// Set next date + advance, but keep the user inside the Pending Advance
+// panel rather than navigating to the cause list.
+function advanceFromPanel(id){
+  const c = cases.find(x => x.id===id);
+  if(!c||!c.nextDate){ showToast('Set next date first','warning'); return; }
+  const newDate = c.nextDate;
+  c.lastDate = c.date; c.date = newDate; c.nextDate = null;
+  c.judgeStatus = null; c.srNo = null; c.done = false;
+  c.comments = [];
+  c.cycle = (c.cycle || 0) + 1;
+  saveToFirebase(c)
+    .then(() => showToast('Advanced to '+fmtDMY(newDate),'success'))
+    .catch(e => showToast('Error: '+e.message,'error'));
+  // Snapshot listener + refreshOpenPanels will re-render the panel
+  // automatically; no manual navigation needed.
+}
+
+// Allow clearing a wrongly-entered next date from any context.
+function clearNextDate(id){
+  const c = cases.find(x => x.id===id); if(!c) return;
+  c.nextDate = null;
+  saveToFirebase(c)
+    .then(() => showToast('Next date cleared','success'))
+    .catch(e => showToast('Error: '+e.message,'error'));
 }
 
 /* ── Bootstrap ── */
